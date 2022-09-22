@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/22 16:17:37 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/22 16:47:41 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define HTTPSERVER_HPP
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #include <cerrno> //entfernen
 #include <cstring>
 #include <string>
@@ -28,7 +29,7 @@ class httpServer
 		httpServer(void);
 		~httpServer(void);
 		void	openSocket(void);
-		void	closeSocket(void);
+		void	closeSocket(int socket);
 		void	log(std::string &message) const;
 		void	listenSocket(void);
 

@@ -28,7 +28,7 @@ httpServer::~httpServer(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer destructor" << std::endl;
-	this->closeSocket();
+	this->closeSocket(this->mSocket);
 }
 
 void httpServer::openSocket(void)
@@ -43,15 +43,16 @@ void httpServer::openSocket(void)
     }
 	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)))
 	{
-        std::cerr << "cannot bind socket " << std::endl;
+        std::cerr << "cannot bind socket " << errno << std::endl;
 		    return ;
 	}
 }
 
-void httpServer::closeSocket(void)
+void httpServer::closeSocket(int socket)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer closeSocket" << std::endl;
+	close(socket);
 }
 
 void httpServer::log(std::string &message) const
@@ -74,23 +75,23 @@ void	httpServer::listenSocket(void)
 	}
 	while (1)
 	{
-  	bzero(buffer, this->mcConfBufSize);
+  		bzero(buffer, this->mcConfBufSize);
 		this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
 		if (this->mMsgFD < 0)
 		{
 		  std::cerr << "cannot accept " << errno << std::endl;
 			return ;
 		}
-		while (recv_return)
+		if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
 		{
-			if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
-			{
-        		std::cerr << "receive failed " << errno << std::endl;
-		   		return ;
-			}
-			if (recv_return > 0)
-				this->mIncMsg.append(buffer);
-			std::cout << this->mIncMsg << std::endl;
+			std::cerr << "receive failed " << errno << std::endl;
+			return ;
 		}
-  }
+		if (recv_return > 0)
+			this->mIncMsg.append(buffer);
+		// write(this->mSocket, "hello from server", sizeof("hello from server"));
+		send(this->mMsgFD, "hello from server", sizeof("hello from server"), 0);
+		std::cout << this->mIncMsg << std::endl;
+		this->closeSocket(this->mMsgFD);
+  	}
 }
