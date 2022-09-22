@@ -39,13 +39,11 @@ $(NAME): $(OBJ)
 
 # removes all object files and the /obj directory and cleans libft
 clean:
-	$(MAKE) clean -C $(LIBFT_DIR)
 	rm -r $(OBJ_DIR)
 	@echo "$(RED)Finished clean$(UNDO_COL)"
 
 # calls 'clean' and removes the executable
 fclean: clean
-	$(MAKE) fclean -C $(LIBFT_DIR)
 	rm -f $(NAME)
 	@echo "$(RED)Finished fclean$(UNDO_COL)"
 

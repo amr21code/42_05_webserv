@@ -6,13 +6,15 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/20 14:25:30 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/22 15:47:47 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPSERVER_HPP
 #define HTTPSERVER_HPP
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <cerrno>
 #include <string>
 #include <iostream>
 #ifndef DEBUG
@@ -27,6 +29,7 @@ class httpServer
 		void	openSocket(void);
 		void	closeSocket(void);
 		void	log(std::string &message) const;
+		void	listenSocket(void);
 
 	private:
 		std::string			mServerName; //config
@@ -35,6 +38,12 @@ class httpServer
 		static const int	mcConfProtocol = 0;
 		int					mSocket;
 		int					mPort;
-		long				m
+		struct sockaddr_in	mSockAddr;
+
+		//new class
+		int					mMsgFD;
+		long				mIncMsg;
+
+		
 };
 #endif
