@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/22 15:47:47 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/22 16:17:37 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 #define HTTPSERVER_HPP
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <cerrno>
+#include <cerrno> //entfernen
+#include <cstring>
 #include <string>
 #include <iostream>
 #ifndef DEBUG
@@ -36,13 +37,15 @@ class httpServer
 		static const int	mcConfDomain = AF_INET;  //m = member, c = const, Conf = config
 		static const int	mcConfComType = SOCK_STREAM;
 		static const int	mcConfProtocol = 0;
+		static const int	mcConfBufSize = 30000;
 		int					mSocket;
 		int					mPort;
 		struct sockaddr_in	mSockAddr;
 
 		//new class
 		int					mMsgFD;
-		long				mIncMsg;
+		std::string			mIncMsg;
+
 
 		
 };
