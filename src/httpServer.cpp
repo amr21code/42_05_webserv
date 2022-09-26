@@ -11,13 +11,30 @@
 /* ************************************************************************** */
 
 #include "httpServer.hpp"
+#include "httpConfig.hpp"
 
+// Default constructor
 httpServer::httpServer(void)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer default constructor" << std::endl;
+	// readConfig();
 	this->mSockAddr.sin_family = this->mcConfDomain;
 	this->mSockAddr.sin_port = htons(2000);
+	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
+	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
+	this->openSocket();
+	this->listenSocket();
+} // CHECK THAT THIS WONT FAIL US!
+
+// Constructor with valid path
+httpServer::httpServer(std::string configPath)
+{
+	if (DEBUG > 2)
+		std::cout << "httpServer constructor with path" << configPath << std::endl;
+	httpConfig config(configPath);
+	this->mSockAddr.sin_family = this->mcConfDomain;
+	this->mSockAddr.sin_port = htons(config.getPort());
 	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	this->openSocket();

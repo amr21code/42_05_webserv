@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/26 13:47:18 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/26 14:33:32 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include "httpConfig.hpp"
 #ifndef DEBUG
 #define DEBUG 0
@@ -28,6 +29,7 @@ class httpServer
 {
 	public:
 		httpServer(void);
+		httpServer(std::string configPath);
 		~httpServer(void);
 		void	openSocket(void);
 		void	closeSocket(int socket);

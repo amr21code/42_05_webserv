@@ -16,13 +16,14 @@ UNDO_COL = \033[0m
 # place all source files here
 SRC = 	$(SRC_DIR)main.cpp \
 		$(SRC_DIR)httpServer.cpp \
+		$(SRC_DIR)httpConfig.cpp \
 		
 
 # takes all named source files and converts them to .o files in the /obj directory
 OBJ = $(SRC:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 
 # prevents rules from being considered as files
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re dall dspec debug
 
 all: $(NAME)
 
@@ -39,7 +40,7 @@ $(NAME): $(OBJ)
 
 # removes all object files and the /obj directory and cleans libft
 clean:
-	rm -r $(OBJ_DIR)
+	-rm -r $(OBJ_DIR)
 	@echo "$(RED)Finished clean$(UNDO_COL)"
 
 # calls 'clean' and removes the executable
@@ -50,13 +51,15 @@ fclean: clean
 # re-makes the whole compilation from scratch
 re: fclean all
 
+debug: fclean dall
+
 dall: $(OBJ)
 	@echo "$(RED)Compiling Debug 3 $(NAME)...$(UNDO_COL)"
-	$(CC) $(CFLAGS) -D DEBUG=3 $^ -o $@
+	$(CC) $(CFLAGS) -D DEBUG=3 $^ -o $(NAME)
 	@echo "$(GREEN)SUCCESSFULLY CREATED WEBSERV!$(UNDO_COL)"
 
 dspec: $(OBJ)
 	@echo "$(RED)Compiling Debug 1 $(NAME)...$(UNDO_COL)"
-	$(CC) $(CFLAGS) -D DEBUG=1 $^ -o $@
+	$(CC) $(CFLAGS) -D DEBUG=1 $^ -o $(NAME)
 	@echo "$(GREEN)SUCCESSFULLY CREATED WEBSERV!$(UNDO_COL)"
  
