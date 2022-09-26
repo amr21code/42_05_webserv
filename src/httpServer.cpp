@@ -90,7 +90,7 @@ void	httpServer::listenSocket(void)
 		if (recv_return > 0)
 			this->mIncMsg.append(buffer);
 		// write(this->mSocket, "hello from server", sizeof("hello from server"));
-		send(this->mMsgFD, "hello from server", sizeof("hello from server"), 0);
+		send(this->mMsgFD, "<!doctype html><h1>hello from server</h1>", sizeof("<!doctype html><h1>hello from server</h1>"), 0);
 		std::cout << this->mIncMsg << std::endl;
 		this->closeSocket(this->mMsgFD);
   	}

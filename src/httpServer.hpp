@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/22 16:47:41 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/26 13:47:18 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include "httpConfig.hpp"
 #ifndef DEBUG
 #define DEBUG 0
 #endif
