@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/26 16:58:34 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/26 17:39:49 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <map>
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -49,7 +50,5 @@ class httpConfig
         void	readConfig(std::string configPath);
 
 };
-
-
 
 #endif
