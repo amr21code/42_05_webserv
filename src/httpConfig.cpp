@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 16:50:24 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 17:11:51 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,14 +75,31 @@ void httpConfig::readConfig(std::string configPath, int elem)
 			if (confLine.find(':') < confLine.npos)
 			{
 				tmp = explode(confLine, ':');
-				configMap[tmp[0]] = tmp[1];
+				if (configMap[tmp[0]] == "")
+					configMap[tmp[0]] = tmp[1];
 			}
 		}
 		else if (cntElem > elem)
 			break ;
 	}
+
+
+// auslagern in setDefault
+	std::map<std::string, std::string> 	configDefault;
+	configDefault["server_names"] = "webserv";
+	configDefault["host"] = "0.0.0.0";
+	configDefault["port"] = "80";
+	configDefault["error_page"] = "./www/errors";
+	configDefault["client_max_body_size"] = "1000000";
+	configDefault["allowed_methods"] = "GET,POST,DELETE";
+	configDefault["CGI"] = "php,py";
 	for (std::map<std::string, std::string>::iterator it = configMap.begin(); it != configMap.end(); it++)
+	{
+		if (it->second == "")
+			it->second = configDefault[it->first];
 		std::cout << it->first << " " << it->second << std::endl;
+
+	}
 }
 
 std::vector<std::string> httpConfig::getServerNames(void)
