@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpServer.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/26 14:33:32 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:19:46 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class httpServer
 		static const int	mcConfProtocol = 0;
 		static const int	mcConfBufSize = 30000;
 		int					mSocket;
-		int					mPort;
+		// int					mPort;
 		struct sockaddr_in	mSockAddr;
 
 		//new class

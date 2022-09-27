@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpConfig.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/26 17:58:25 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:28:34 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,19 @@ httpConfig::~httpConfig(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpConfig destructor" << std::endl;
+}
+
+std::vector<std::string> httpConfig::explode(std::string confLine, char c)
+{
+	std::vector<std::string> ret_vector;
+
+	size_t colonPos = confLine.find(c);
+	
+	ret_vector.push_back(confLine.substr(0, colonPos));
+	ret_vector.push_back(confLine.substr(colonPos + 1, confLine.length() - 1));
+
+	
+	return (ret_vector);
 }
 
 void httpConfig::readConfig(std::string configPath)

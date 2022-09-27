@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpConfig.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/26 17:39:49 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:14:42 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class httpConfig
 		// int							getMaxBodySize(void);
 		// std::vector<std::string>	getMethods(void);
 		// std::vector<std::string>	getCGI(void);
+		std::vector<std::string> explode(std::string confLine, char c);
 
 	private:
 		std::vector<std::string>	mServerNames;
