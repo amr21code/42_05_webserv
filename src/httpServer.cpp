@@ -32,9 +32,9 @@ httpServer::httpServer(std::string configPath)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" << configPath << std::endl;
-	httpConfig config(configPath);
+	// httpConfig config(configPath);
 	this->mSockAddr.sin_family = this->mcConfDomain;
-	this->mSockAddr.sin_port = htons(config.getPort());
+	// this->mSockAddr.sin_port = htons(config.getPort());
 	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	this->openSocket();

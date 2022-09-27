@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpConfig.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 14:14:42 by raweber          ###   ########.fr       */
+/*   Updated: 2022/09/27 16:16:31 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iterator>
 #include <map>
 #ifndef DEBUG
 #define DEBUG 0
@@ -28,7 +29,7 @@ class httpConfig
 
 	public:
         httpConfig(void);
-        httpConfig(std::string configPath);
+        httpConfig(std::string configPath, int elem);
         ~httpConfig(void);
 
 		std::vector<std::string>    getServerNames(void);
@@ -48,7 +49,7 @@ class httpConfig
 		// int							mMaxBodySize; //max 1M
 		// std::vector<std::string>	mMethods;
 		// std::vector<std::string>	mCGI;
-        void	readConfig(std::string configPath);
+        void	readConfig(std::string configPath, int elem);
 
 };
 

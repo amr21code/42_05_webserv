@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpConfig.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 14:28:34 by raweber          ###   ########.fr       */
+/*   Updated: 2022/09/27 16:46:20 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@ httpConfig::httpConfig(void)
 		std::cout << "httpConfig default constructor" << std::endl;
 }
 
-httpConfig::httpConfig(std::string configPath)
+httpConfig::httpConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
 		std::cout << "httpConfig constructor with path" << configPath << std::endl;
-	readConfig(configPath);
+	readConfig(configPath, elem);
 }
 
 httpConfig::~httpConfig(void)
@@ -44,19 +44,19 @@ std::vector<std::string> httpConfig::explode(std::string confLine, char c)
 	return (ret_vector);
 }
 
-void httpConfig::readConfig(std::string configPath)
+void httpConfig::readConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
 		std::cout << "readConfig with path" << configPath << std::endl;
 	std::ifstream ss;
     ss.open(configPath.c_str());
 
-  	if (ss.peek() == std::ifstream::traits_type::eof())
-    {
-        std::cerr << "file is empty" << std::endl;    
-		return ; // add exit function/exception? handle this kind of cases everywhere
-    }
-    std::string configVars[7] ={"server_names",	"host",	"port",	"error_page", "client_max_body_size", "allowed_methods", "CGI"};
+  	// if (ss.peek() == std::ifstream::traits_type::eof())
+    // {
+    //     std::cerr << "file is empty" << std::endl;    
+	// 	return ; // add exit function/exception? handle this kind of cases everywhere
+    // }
+    // std::string configVars[7] ={"server_names",	"host",	"port",	"error_page", "client_max_body_size", "allowed_methods", "CGI"};
 	std::map<std::string, std::string> configMap;
 	
 	configMap["server_names"] = "";
@@ -68,16 +68,28 @@ void httpConfig::readConfig(std::string configPath)
 	configMap["CGI"] = "";
 
 	std::string confLine;
+	int			cntElem = 0;
 	while (getline(ss, confLine))
 	{
-		std::vector<std::string> tmp;
-		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
-		if (confLine.find(':') < confLine.npos)
+		if (confLine.find("<server>") < confLine.npos)
+			cntElem++;
+		else if (cntElem == elem)
 		{
-            tmp = explode(confLine, ':');
-			std::cout << "1 " << tmp[0] << std::endl;
-			std::cout << "2 " << tmp[1] << std::endl;
+			std::vector<std::string> tmp;
+			confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+
+			if (confLine.find(':') < confLine.npos)
+			{
+				tmp = explode(confLine, ':');
+				configMap[tmp[0]] = tmp[1];
+				// std::cout << "1 " << tmp[0] << std::endl;
+				// std::cout << "2 " << tmp[1] << std::endl;
+			}
 		}
+		else if (cntElem > elem)
+			break ;
+
+
 		// std::cout << confLine << std::endl; // should print without tabs
         
 		
@@ -88,6 +100,9 @@ void httpConfig::readConfig(std::string configPath)
         // switch ()
 	}
 
+		for (std::map<std::string, std::string>::iterator it = configMap.begin(); it != configMap.end(); it++)
+			std::cout << it->first << " " << it->second << std::endl;
+	
 
 
 
