@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 16:41:55 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 17:01:12 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@ int	cfgErrorCheck(std::string configPath)
 {
 	// check for several format errors
 	std::ifstream ss;
+	std::string confLine;
+	int			countServers = 0;
+
     ss.open(configPath.c_str());
 
   	if (ss.peek() == std::ifstream::traits_type::eof())
@@ -23,18 +26,7 @@ int	cfgErrorCheck(std::string configPath)
         std::cerr << "file is empty" << std::endl;    
 		return (-1); // add exit function/exception? handle this kind of cases everywhere
     }
-	// std::map<std::string, std::string> configMap;
-	
-	// configMap["server_names"] = "";
-	// configMap["host"] = "";
-	// configMap["port"] = "";
-	// configMap["error_page"] = "";
-	// configMap["client_max_body_size"] = "";
-	// configMap["allowed_methods"] = "";
-	// configMap["CGI"] = "";
 
-	std::string confLine;
-	int			countServers = 0;
 	while (getline(ss, confLine))
 	{
 		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
@@ -67,11 +59,8 @@ int	cfgErrorCheck(std::string configPath)
 				}
 			}
 		}
-		// std::cout << confLine << std::endl; // should print without tabs
-	
 	}
 	return (countServers);
-	// return number of configs if all are valid
 }
 
 
@@ -94,13 +83,19 @@ int	main(int argc, char **argv)
 	std::vector<httpConfig *> confVector;
 	for (int i = 0; i < countServers; i++)
 	{
-		// httpConfig	*tmp = ;
 		confVector.push_back(new httpConfig(configPath, i + 1));
+		// std::cout << confVector[i]->getHost() << std::endl;
 		//vector of config objects
 		//vector of server objects(construction with config object)
 		//later with thread
 	}
 
+	for (int i = 0; i < countServers; i++)
+	{
+		if (confVector[i])
+			delete confVector[i];
+		confVector[i] = NULL;
+	}
 		// httpServer start(configPath);
 	return 0;
 }

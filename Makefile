@@ -7,7 +7,7 @@ OBJ_DIR = obj/
 INC_DIR = inc/
 OS = $(shell uname)
 CC = c++
-CFLAGS = -Wall -Werror -Wextra -std=c++98
+CFLAGS = -Wall -Werror -Wextra -std=c++98 -g3
 GREEN = \033[0;32m
 RED = \033[0;31m
 UNDO_COL = \033[0m

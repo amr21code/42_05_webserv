@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 16:46:20 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/27 16:50:24 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,17 +48,12 @@ void httpConfig::readConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
 		std::cout << "readConfig with path" << configPath << std::endl;
-	std::ifstream ss;
-    ss.open(configPath.c_str());
+	std::ifstream 						ss;
+	std::map<std::string, std::string> 	configMap;
+	std::string 						confLine;
+	int									cntElem = 0;
+	std::vector<std::string> 			tmp;
 
-  	// if (ss.peek() == std::ifstream::traits_type::eof())
-    // {
-    //     std::cerr << "file is empty" << std::endl;    
-	// 	return ; // add exit function/exception? handle this kind of cases everywhere
-    // }
-    // std::string configVars[7] ={"server_names",	"host",	"port",	"error_page", "client_max_body_size", "allowed_methods", "CGI"};
-	std::map<std::string, std::string> configMap;
-	
 	configMap["server_names"] = "";
 	configMap["host"] = "";
 	configMap["port"] = "";
@@ -66,49 +61,28 @@ void httpConfig::readConfig(std::string configPath, int elem)
 	configMap["client_max_body_size"] = "";
 	configMap["allowed_methods"] = "";
 	configMap["CGI"] = "";
+	
+    ss.open(configPath.c_str());
 
-	std::string confLine;
-	int			cntElem = 0;
 	while (getline(ss, confLine))
 	{
 		if (confLine.find("<server>") < confLine.npos)
 			cntElem++;
 		else if (cntElem == elem)
 		{
-			std::vector<std::string> tmp;
-			confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+			confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
 
 			if (confLine.find(':') < confLine.npos)
 			{
 				tmp = explode(confLine, ':');
 				configMap[tmp[0]] = tmp[1];
-				// std::cout << "1 " << tmp[0] << std::endl;
-				// std::cout << "2 " << tmp[1] << std::endl;
 			}
 		}
 		else if (cntElem > elem)
 			break ;
-
-
-		// std::cout << confLine << std::endl; // should print without tabs
-        
-		
-		// for (int i = 0; i<7; i++)
-        // {
-        //     if ()
-        // }
-        // switch ()
 	}
-
-		for (std::map<std::string, std::string>::iterator it = configMap.begin(); it != configMap.end(); it++)
-			std::cout << it->first << " " << it->second << std::endl;
-	
-
-
-
-	// this->mServerNames
-	// this->mHost
-	// this->mPort
+	for (std::map<std::string, std::string>::iterator it = configMap.begin(); it != configMap.end(); it++)
+		std::cout << it->first << " " << it->second << std::endl;
 }
 
 std::vector<std::string> httpConfig::getServerNames(void)
