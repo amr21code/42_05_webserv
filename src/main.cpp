@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 17:01:12 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 15:51:35 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	cfgErrorCheck(std::string configPath)
 			while (getline(ss, confLine))
 			{
 				confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
-
+// location durchzählen
 				if (confLine.find("<server>") < confLine.npos)
 				{
 					std::cerr << "Error (2): unclosed <server> element" << std::endl;
@@ -84,8 +84,7 @@ int	main(int argc, char **argv)
 	for (int i = 0; i < countServers; i++)
 	{
 		confVector.push_back(new httpConfig(configPath, i + 1));
-		// std::cout << confVector[i]->getHost() << std::endl;
-		//vector of config objects
+
 		//vector of server objects(construction with config object)
 		//later with thread
 	}

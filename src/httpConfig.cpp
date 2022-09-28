@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 17:11:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 16:00:26 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,18 +49,12 @@ void httpConfig::readConfig(std::string configPath, int elem)
 	if (DEBUG > 2)
 		std::cout << "readConfig with path" << configPath << std::endl;
 	std::ifstream 						ss;
-	std::map<std::string, std::string> 	configMap;
+
 	std::string 						confLine;
 	int									cntElem = 0;
 	std::vector<std::string> 			tmp;
 
-	configMap["server_names"] = "";
-	configMap["host"] = "";
-	configMap["port"] = "";
-	configMap["error_page"] = "";
-	configMap["client_max_body_size"] = "";
-	configMap["allowed_methods"] = "";
-	configMap["CGI"] = "";
+
 	
     ss.open(configPath.c_str());
 
@@ -75,8 +69,16 @@ void httpConfig::readConfig(std::string configPath, int elem)
 			if (confLine.find(':') < confLine.npos)
 			{
 				tmp = explode(confLine, ':');
-				if (configMap[tmp[0]] == "")
-					configMap[tmp[0]] = tmp[1];
+				if (this->mConfigMap[tmp[0]] == "")
+					this->mConfigMap[tmp[0]] = tmp[1];
+			}
+			else if (confLine.find("<location>") < confLine.npos)
+			{
+				while (getline(ss, confLine))
+				{
+					if (confLine.find("</location>") < confLine.npos) // just to skip
+						break ;
+				}
 			}
 		}
 		else if (cntElem > elem)
@@ -85,36 +87,49 @@ void httpConfig::readConfig(std::string configPath, int elem)
 
 
 // auslagern in setDefault
-	std::map<std::string, std::string> 	configDefault;
-	configDefault["server_names"] = "webserv";
-	configDefault["host"] = "0.0.0.0";
-	configDefault["port"] = "80";
-	configDefault["error_page"] = "./www/errors";
-	configDefault["client_max_body_size"] = "1000000";
-	configDefault["allowed_methods"] = "GET,POST,DELETE";
-	configDefault["CGI"] = "php,py";
-	for (std::map<std::string, std::string>::iterator it = configMap.begin(); it != configMap.end(); it++)
+
+
+	for (std::map<std::string, std::string>::iterator it = this->mConfigMap.begin(); it != this->mConfigMap.end(); it++)
 	{
 		if (it->second == "")
-			it->second = configDefault[it->first];
+			it->second = this->mConfigDefault[it->first];
 		std::cout << it->first << " " << it->second << std::endl;
 
 	}
 }
 
-std::vector<std::string> httpConfig::getServerNames(void)
+void	httpConfig::initHttpConf(void)
 {
-    return (this->mServerNames);
+	this->mConfigMap["server_names"] = "";
+	this->mConfigMap["host"] = "";
+	this->mConfigMap["port"] = "";
+	this->mConfigMap["error_page"] = "";
+	this->mConfigMap["client_max_body_size"] = "";
+	this->mConfigMap["allowed_methods"] = "";
+	this->mConfigMap["CGI"] = "";
+	
+	this->mConfigDefault["server_names"] = "webserv";
+	this->mConfigDefault["host"] = "0.0.0.0";
+	this->mConfigDefault["port"] = "80";
+	this->mConfigDefault["error_page"] = "./www/errors";
+	this->mConfigDefault["client_max_body_size"] = "1000000";
+	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
+	this->mConfigDefault["CGI"] = "php,py";
+}
+
+std::string httpConfig::getServerNames(void)
+{
+    return (this->mConfigMap["server_names"]);
 }
 
 std::string httpConfig::getHost(void)
 {
-    return (this->mHost);
+    return (this->mConfigMap["host"]);
 }
 
-int httpConfig::getPort(void)
+std::string httpConfig::getPort(void)
 {
-    return (this->mPort);
+    return (this->mConfigMap["port"]);
 }
 
 // std::string httpConfig::getErrors(void)
