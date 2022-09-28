@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpServer.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/27 14:19:46 by raweber          ###   ########.fr       */
+/*   Updated: 2022/09/28 17:31:26 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <arpa/inet.h>
 #include "httpConfig.hpp"
 #ifndef DEBUG
 #define DEBUG 0
@@ -30,6 +31,7 @@ class httpServer
 	public:
 		httpServer(void);
 		httpServer(std::string configPath);
+		httpServer(httpConfig *config);
 		~httpServer(void);
 		void	openSocket(void);
 		void	closeSocket(int socket);
@@ -45,6 +47,7 @@ class httpServer
 		int					mSocket;
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;
+		httpConfig			*mConfig;
 
 		//new class
 		int					mMsgFD;

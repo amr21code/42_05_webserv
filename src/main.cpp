@@ -6,11 +6,12 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 15:51:35 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 18:11:03 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.hpp"
+#include <pthread.h>
 
 int	cfgErrorCheck(std::string configPath)
 {
@@ -63,6 +64,12 @@ int	cfgErrorCheck(std::string configPath)
 	return (countServers);
 }
 
+void	*startServer(void *arg)
+{
+	httpServer *tmp = (httpServer *)arg;
+	tmp->listenSocket();
+	return (0);
+}
 
 int	main(int argc, char **argv)
 {
@@ -81,20 +88,28 @@ int	main(int argc, char **argv)
 	std::string configPath(argv[1]);
 	int			countServers = cfgErrorCheck(configPath);
 	std::vector<httpConfig *> confVector;
+	std::vector<httpServer *> serverVector;
+	std::vector<pthread_t *> threadVector;
 	for (int i = 0; i < countServers; i++)
 	{
 		confVector.push_back(new httpConfig(configPath, i + 1));
-
-		//vector of server objects(construction with config object)
-		//later with thread
+		serverVector.push_back(new httpServer(confVector[i]));
 	}
-
+	for (int i = 0; i < countServers; i++)
+	{
+		pthread_t *newThread = new pthread_t();
+		threadVector.push_back(newThread);
+		pthread_create(threadVector[i], NULL, startServer, serverVector[i]);
+	}
+	for (int i = 0; i < countServers; i++)
+	{
+		pthread_join(*threadVector[i], NULL);
+	}
 	for (int i = 0; i < countServers; i++)
 	{
 		if (confVector[i])
 			delete confVector[i];
 		confVector[i] = NULL;
 	}
-		// httpServer start(configPath);
 	return 0;
 }

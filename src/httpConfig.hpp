@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 16:00:06 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 17:25:18 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class httpConfig
 
 		std::string				    getServerNames(void);
         std::string                 getHost(void);
-        std::string                 getPort(void);
+        int			                 getPort(void);
         // std::string					getErrors(void);
 		// int							getMaxBodySize(void);
 		// std::vector<std::string>	getMethods(void);
@@ -51,8 +51,8 @@ class httpConfig
 		// int							mMaxBodySize; //max 1M
 		// std::vector<std::string>	mMethods;
 		// std::vector<std::string>	mCGI;
-        void	readConfig(std::string configPath, int elem);
-		void	initHttpConf(void);
+        void	mReadConfig(std::string configPath, int elem);
+		void	mInitHttpConf(void);
 
 };
 

@@ -32,27 +32,23 @@ httpServer::httpServer(std::string configPath)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" << configPath << std::endl;
-	// httpConfig config(configPath);
 	this->mSockAddr.sin_family = this->mcConfDomain;
-	// this->mSockAddr.sin_port = htons(config.getPort());
 	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	this->openSocket();
-	this->listenSocket();
 }
 
 // Constructor with valid path
-httpServer::httpServer(std::string configPath)
+httpServer::httpServer(httpConfig *config)
 {
 	if (DEBUG > 2)
-		std::cout << "httpServer constructor with path" << configPath << std::endl;
-	// httpConfig config(configPath);
+		std::cout << "httpServer constructor with path" <<  std::endl;
+	this->mConfig = config;
 	this->mSockAddr.sin_family = this->mcConfDomain;
-	// this->mSockAddr.sin_port = htons(config.getPort());
-	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
+	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
+	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	this->openSocket();
-	this->listenSocket();
 }
 
 httpServer::~httpServer(void)
@@ -120,8 +116,9 @@ void	httpServer::listenSocket(void)
 		}
 		if (recv_return > 0)
 			this->mIncMsg.append(buffer);
-		// write(this->mSocket, "hello from server", sizeof("hello from server"));
-		send(this->mMsgFD, "<!doctype html><h1>hello from server</h1>", sizeof("<!doctype html><h1>hello from server</h1>"), 0);
+		std::string msg = "hello from server ";
+		msg.append(this->mConfig->getServerNames());
+		send(this->mMsgFD, msg.c_str(), msg.size(), 0);
 		std::cout << this->mIncMsg << std::endl;
 		this->closeSocket(this->mMsgFD);
   	}

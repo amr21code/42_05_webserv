@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 16:00:26 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 17:36:16 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ httpConfig::httpConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
 		std::cout << "httpConfig constructor with path" << configPath << std::endl;
-	readConfig(configPath, elem);
+	this->mInitHttpConf();
+	this->mReadConfig(configPath, elem);
 }
 
 httpConfig::~httpConfig(void)
@@ -44,7 +45,7 @@ std::vector<std::string> httpConfig::explode(std::string confLine, char c)
 	return (ret_vector);
 }
 
-void httpConfig::readConfig(std::string configPath, int elem)
+void httpConfig::mReadConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
 		std::cout << "readConfig with path" << configPath << std::endl;
@@ -98,7 +99,7 @@ void httpConfig::readConfig(std::string configPath, int elem)
 	}
 }
 
-void	httpConfig::initHttpConf(void)
+void	httpConfig::mInitHttpConf(void)
 {
 	this->mConfigMap["server_names"] = "";
 	this->mConfigMap["host"] = "";
@@ -127,9 +128,9 @@ std::string httpConfig::getHost(void)
     return (this->mConfigMap["host"]);
 }
 
-std::string httpConfig::getPort(void)
+int httpConfig::getPort(void)
 {
-    return (this->mConfigMap["port"]);
+    return (atoi(this->mConfigMap["port"].c_str()));
 }
 
 // std::string httpConfig::getErrors(void)
