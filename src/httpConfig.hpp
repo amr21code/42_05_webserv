@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 17:25:18 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 18:53:50 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,9 @@ class httpConfig
 		// std::vector<std::string>	mServerNames;
 		// std::string					mHost;
 		// int							mPort;
-		std::map<std::string, std::string> 	mConfigMap;
-		std::map<std::string, std::string> 	mConfigDefault;
+		std::map<std::string, std::string>					mConfigMap;
+		std::map<std::string, std::string>					mConfigDefault;
+		std::vector<std::map<std::string, std::string> > 	mConfLocations;
 		// std::string					mErrors; // filename / object
 		// int							mMaxBodySize; //max 1M
 		// std::vector<std::string>	mMethods;

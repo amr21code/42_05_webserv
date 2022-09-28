@@ -6,12 +6,45 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 18:11:03 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/28 18:56:18 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.hpp"
 #include <pthread.h>
+
+int cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
+{
+	if (ss.peek() == std::ifstream::traits_type::eof())
+	{
+		std::cerr << "Error (1): unclosed <location> element" << std::endl;
+		return (-1);
+	}
+	while (getline(ss, confLine))
+	{
+		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+		if (!confLine.compare("<server>") || !confLine.compare("</server>"))
+		{
+			std::cerr << "Error (4): unclosed <location> element" << std::endl;
+			return (-1);
+		}
+		if (confLine.find("<location>") < confLine.npos)
+		{
+			std::cerr << "Error (2): unclosed <location> element" << std::endl;
+			return (-1);
+		}
+		if (confLine.find("</location>") < confLine.npos)
+		{
+			break ;
+		}
+		if (ss.peek() == std::ifstream::traits_type::eof())
+		{
+			std::cerr << "Error (3): unclosed <location> element" << std::endl;
+			return (-1);
+		}
+	}
+	return (0);
+}
 
 int	cfgErrorCheck(std::string configPath)
 {
@@ -42,11 +75,15 @@ int	cfgErrorCheck(std::string configPath)
 			while (getline(ss, confLine))
 			{
 				confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
-// location durchzählen
 				if (confLine.find("<server>") < confLine.npos)
 				{
 					std::cerr << "Error (2): unclosed <server> element" << std::endl;
 					return (-1);
+				}
+				if (confLine.find("<location>") < confLine.npos)
+				{
+					if (cfgLocationErrorCheck(confLine, ss) < 0)
+						return (-1);
 				}
 				if (confLine.find("</server>") < confLine.npos)
 				{
