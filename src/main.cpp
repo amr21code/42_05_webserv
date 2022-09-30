@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 12:05:58 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 12:11:41 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
 
 int	cfgErrorCheck(std::string configPath)
 {
-	// check for several format errors
 	std::ifstream ss;
 	std::string confLine;
 	int			countServers = 0;

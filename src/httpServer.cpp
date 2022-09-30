@@ -117,8 +117,18 @@ void	httpServer::listenSocket(void)
 		}
 		if (recv_return > 0)
 			this->mIncMsg.append(buffer);
-		std::string msg = "hello from server ";
-		msg.append(this->mConfig->getServerNames());
+		std::ifstream 	ifile;
+		std::string		tmp;
+		std::string		msg;
+		ifile.open("test.html");
+		while (getline(ifile, tmp))
+		{
+			msg.append(tmp);
+			msg.append("\n");
+		}
+		// std::string msg = "HTTP/1.1 200 OK";
+		// msg.append(this->mConfig->getServerNames());
+		std::cout << msg.c_str() << std::endl;
 		send(this->mMsgFD, msg.c_str(), msg.size(), 0);
 		std::cout << this->mIncMsg << std::endl;
 		this->closeSocket(this->mMsgFD);
