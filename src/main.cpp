@@ -6,13 +6,32 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 11:30:32 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 12:05:58 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.hpp"
 #include <pthread.h>
 #include <exception>
+
+void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, std::vector<pthread_t *> threadVector, int countServers, int actualServers)
+{
+	for (int i = 0; i < actualServers; i++)
+	{
+		if (confVector[i])
+			delete confVector[i];
+		confVector[i] = NULL;
+		if (serverVector[i])
+			delete serverVector[i];
+		serverVector[i] = NULL;
+		if (countServers == actualServers)
+		{
+			if (threadVector[i])
+				delete threadVector[i];
+			threadVector[i] = NULL;
+		}
+	}	
+}
 
 void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
 {
@@ -135,8 +154,17 @@ int	main(int argc, char **argv)
 	std::vector<pthread_t *> threadVector;
 	for (int i = 0; i < countServers; i++)
 	{
-		confVector.push_back(new httpConfig(configPath, i + 1));
-		serverVector.push_back(new httpServer(confVector[i]));
+		try
+		{
+			confVector.push_back(new httpConfig(configPath, i + 1));
+			serverVector.push_back(new httpServer(confVector[i]));
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+			destroyAllocs(confVector, serverVector, threadVector, countServers, i);
+			return (0);
+		}
 	}
 	for (int i = 0; i < countServers; i++)
 	{
@@ -148,11 +176,6 @@ int	main(int argc, char **argv)
 	{
 		pthread_join(*threadVector[i], NULL);
 	}
-	for (int i = 0; i < countServers; i++)
-	{
-		if (confVector[i])
-			delete confVector[i];
-		confVector[i] = NULL;
-	}
+	destroyAllocs(confVector, serverVector, threadVector, countServers, countServers);
 	return 0;
 }

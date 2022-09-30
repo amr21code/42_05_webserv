@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 11:28:03 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:51:38 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,15 @@ httpConfig::httpConfig(std::string configPath, int elem)
 	if (DEBUG > 2)
 		std::cout << "httpConfig constructor with path" << configPath << std::endl;
 	this->mInitHttpConf();
-	this->mReadConfig(configPath, elem);
+	try
+	{
+		this->mReadConfig(configPath, elem);
+	}
+	catch(const std::logic_error& e)
+	{
+		throw e;
+		// std::cerr << e.what() << '\n';
+	}
 }
 
 httpConfig::~httpConfig(void)
@@ -70,6 +78,14 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 			if (confLine.find_first_of(':') < confLine.npos)
 			{
 				tmp = explode(confLine, ':');
+				std::map<std::string, std::string>::iterator it;
+				for (it = this->mConfigMap.begin(); it != this->mConfigMap.end(); it++)
+				{
+					if (it->first == tmp[0])
+							break ;
+				}
+				if (it == this->mConfigMap.end())
+					throw std::logic_error("Error: crap inside server");
 				if (this->mConfigMap[tmp[0]] == "")
 					this->mConfigMap[tmp[0]] = tmp[1];
 			}
@@ -89,7 +105,7 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 	{
 		if (it->second == "")
 			it->second = this->mConfigDefault[it->first];
-		std::cout << it->first << " " << it->second << std::endl;
+		// std::cout << it->first << " " << it->second << std::endl;
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 17:31:26 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:37:19 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <fstream>
 #include <arpa/inet.h>
 #include "httpConfig.hpp"
+#include "colors.hpp"
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -37,6 +38,7 @@ class httpServer
 		void	closeSocket(int socket);
 		void	log(std::string &message) const;
 		void	listenSocket(void);
+		void	announce(void) const;
 
 	private:
 		std::string			mServerName; //config

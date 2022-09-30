@@ -100,6 +100,7 @@ void	httpServer::listenSocket(void)
 		std::cerr << "cannot listen" << std::endl;
 		return ;
 	}
+	this->announce();
 	while (1)
 	{
   		bzero(buffer, this->mcConfBufSize);
@@ -122,4 +123,11 @@ void	httpServer::listenSocket(void)
 		std::cout << this->mIncMsg << std::endl;
 		this->closeSocket(this->mMsgFD);
   	}
+}
+
+void	httpServer::announce(void) const
+{
+	std::cout << C_GREEN << "Server" << C_GREY << " ( " << this->mConfig->getHost() << ":";
+	std::cout << this->mConfig->getPort() << " ) " << this->mConfig->getServerNames();
+	std::cout << C_DEF << C_GREEN << " started" << C_DEF << std::endl;
 }
