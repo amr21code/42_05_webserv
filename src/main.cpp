@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 12:11:41 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 14:42:39 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,3 +178,4 @@ int	main(int argc, char **argv)
 	destroyAllocs(confVector, serverVector, threadVector, countServers, countServers);
 	return 0;
 }
+
