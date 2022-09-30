@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 11:03:54 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:10:51 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,8 @@ int	cfgErrorCheck(std::string configPath)
 						throw e;
 					}
 				}
+				else if (confLine.find("</location>") < confLine.npos)
+					throw std::logic_error("Error: closing </location> without opening");
 				if (confLine.find("</server>") < confLine.npos)
 				{
 					if (confLine.compare("</server>"))
@@ -87,7 +89,11 @@ int	cfgErrorCheck(std::string configPath)
 					throw std::logic_error("Error (3): unclosed <server> element");
 			}
 		}
+		else if (confLine.find("</server>") < confLine.npos)
+			throw std::logic_error("Error: closing </server> without opening");
 	}
+	if (!countServers)
+		throw std::logic_error("Error: no server in config");
 	return (countServers);
 }
 
