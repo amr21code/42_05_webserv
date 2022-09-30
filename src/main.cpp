@@ -6,44 +6,34 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 18:56:18 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:03:54 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.hpp"
 #include <pthread.h>
+#include <exception>
 
-int cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
+void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
 {
 	if (ss.peek() == std::ifstream::traits_type::eof())
-	{
-		std::cerr << "Error (1): unclosed <location> element" << std::endl;
-		return (-1);
-	}
+		throw std::logic_error("Error (1): unclosed <location> element");
 	while (getline(ss, confLine))
 	{
-		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
 		if (!confLine.compare("<server>") || !confLine.compare("</server>"))
-		{
-			std::cerr << "Error (4): unclosed <location> element" << std::endl;
-			return (-1);
-		}
+			throw std::logic_error("Error (2): unclosed <location> element");
 		if (confLine.find("<location>") < confLine.npos)
-		{
-			std::cerr << "Error (2): unclosed <location> element" << std::endl;
-			return (-1);
-		}
+			throw std::logic_error("Error (3): unclosed <location> element");
 		if (confLine.find("</location>") < confLine.npos)
 		{
+			if (confLine.compare("</location>"))
+				throw std::logic_error("Error (1): only one tag per line allowed");
 			break ;
 		}
 		if (ss.peek() == std::ifstream::traits_type::eof())
-		{
-			std::cerr << "Error (3): unclosed <location> element" << std::endl;
-			return (-1);
-		}
+			throw std::logic_error("Error (4): unclosed <location> element");
 	}
-	return (0);
 }
 
 int	cfgErrorCheck(std::string configPath)
@@ -56,45 +46,45 @@ int	cfgErrorCheck(std::string configPath)
     ss.open(configPath.c_str());
 
   	if (ss.peek() == std::ifstream::traits_type::eof())
-    {
-        std::cerr << "file is empty" << std::endl;    
-		return (-1); // add exit function/exception? handle this kind of cases everywhere
-    }
+        throw std::logic_error("Error: file is empty");
 
 	while (getline(ss, confLine))
 	{
-		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+		confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
 
 		if (confLine.find("<server>") < confLine.npos)
 		{
+			if (confLine.compare("<server>"))
+				throw std::logic_error("Error (2): only one tag per line allowed");
 			if (ss.peek() == std::ifstream::traits_type::eof())
-			{
-				std::cerr << "Error (1): unclosed <server> element" << std::endl;
-				return (-1);
-			}
+				throw std::logic_error("Error (1): unclosed <server> element");
 			while (getline(ss, confLine))
 			{
-				confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end()); // should remove tabs
+				confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
 				if (confLine.find("<server>") < confLine.npos)
-				{
-					std::cerr << "Error (2): unclosed <server> element" << std::endl;
-					return (-1);
-				}
+					throw std::logic_error("Error (2): unclosed <server> element");
 				if (confLine.find("<location>") < confLine.npos)
 				{
-					if (cfgLocationErrorCheck(confLine, ss) < 0)
-						return (-1);
+					try
+					{
+						if (confLine.compare("<location>"))
+							throw std::logic_error("Error (3): only one tag per line allowed");
+						cfgLocationErrorCheck(confLine, ss);
+					}
+					catch(const std::logic_error& e) 	
+					{
+						throw e;
+					}
 				}
 				if (confLine.find("</server>") < confLine.npos)
 				{
+					if (confLine.compare("</server>"))
+						throw std::logic_error("Error (4): only one tag per line allowed");
 					countServers++;
 					break ;
 				}
 				if (ss.peek() == std::ifstream::traits_type::eof())
-				{
-					std::cerr << "Error (3): unclosed <server> element" << std::endl;
-					return (-1);
-				}
+					throw std::logic_error("Error (3): unclosed <server> element");
 			}
 		}
 	}
@@ -123,7 +113,15 @@ int	main(int argc, char **argv)
 	}
 
 	std::string configPath(argv[1]);
-	int			countServers = cfgErrorCheck(configPath);
+	int			countServers = 0;
+	try
+	{
+		countServers = cfgErrorCheck(configPath);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 	std::vector<httpConfig *> confVector;
 	std::vector<httpServer *> serverVector;
 	std::vector<pthread_t *> threadVector;
