@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 18:43:24 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:28:03 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 				}
 			}
 		}
-		else if (cntElem > elem)
+		else if ((confLine.find("</server>") && cntElem == elem) || cntElem > elem)
 			break ;
 	}
 	for (std::map<std::string, std::string>::iterator it = this->mConfigMap.begin(); it != this->mConfigMap.end(); it++)

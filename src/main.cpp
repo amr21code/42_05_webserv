@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 11:10:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/09/30 11:30:32 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ int	cfgErrorCheck(std::string configPath)
 		}
 		else if (confLine.find("</server>") < confLine.npos)
 			throw std::logic_error("Error: closing </server> without opening");
+		else if (confLine.find_first_not_of(" ") < confLine.npos)
+			throw std::logic_error("Error: crap between servers");
 	}
 	if (!countServers)
 		throw std::logic_error("Error: no server in config");
@@ -108,13 +110,13 @@ int	main(int argc, char **argv)
 {
 	if (argc !=2)
 	{
-		std::cerr << "wrong number of input arguments" << std::endl;
+		std::cerr << "Error: wrong number of input arguments" << std::endl;
 		return (1);
 	}
 	std::ifstream test(argv[1]);
     if (!test.good())
 	{
-		std::cerr << "could not open config file" << std::endl;
+		std::cerr << "Error: could not open config file" << std::endl;
 		return (1);
 	}
 
