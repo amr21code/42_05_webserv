@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/11 14:18:34 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/11 16:01:18 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,9 @@ class httpServer
 		void	log(std::string &message) const;
 		void	listenSocket(void);
 		void	announce(void) const;
+		int		getMsgFD(void);
+		int		getSocket(void);
+		void	receive(void);
 
 	private:
 		std::string			mServerName; //config

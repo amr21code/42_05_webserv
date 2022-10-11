@@ -91,9 +91,9 @@ void httpServer::log(std::string &message) const
 
 void	httpServer::listenSocket(void)
 {
-	int		addrlen = sizeof(this->mSockAddr);
-	char	buffer[this->mcConfBufSize];
-	int		recv_return = 1;
+	// int		addrlen = sizeof(this->mSockAddr);
+	// char	buffer[this->mcConfBufSize];
+	// int		recv_return = 1;
 
 	if (listen(this->mSocket, 2))
 	{
@@ -101,38 +101,48 @@ void	httpServer::listenSocket(void)
 		return ;
 	}
 	this->announce();
-	while (1)
+	// while (1)
+	// {
+  		// bzero(buffer, this->mcConfBufSize);
+
+  	// }
+}
+
+void	httpServer::receive(void)
+{
+	int		addrlen = sizeof(this->mSockAddr);
+	char	buffer[this->mcConfBufSize];
+	int		recv_return = 1;
+
+	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
+	if (this->mMsgFD < 0)
 	{
-  		bzero(buffer, this->mcConfBufSize);
-		this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
-		if (this->mMsgFD < 0)
-		{
-		  std::cerr << "cannot accept " << errno << std::endl;
-			return ;
-		}
-		if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
-		{
-			std::cerr << "receive failed " << errno << std::endl;
-			return ;
-		}
-		if (recv_return > 0)
-			this->mIncMsg.append(buffer);
-		std::ifstream 	ifile;
-		std::string		tmp;
-		std::string		msg;
-		ifile.open("test.html");
-		while (getline(ifile, tmp))
-		{
-			msg.append(tmp);
-			msg.append("\n");
-		}
-		// std::string msg = "HTTP/1.1 200 OK";
-		// msg.append(this->mConfig->getServerNames());
-		std::cout << msg.c_str() << std::endl;
-		send(this->mMsgFD, msg.c_str(), msg.size(), 0);
-		std::cout << this->mIncMsg << std::endl;
-		this->closeSocket(this->mMsgFD);
-  	}
+		std::cerr << "cannot accept " << errno << std::endl;
+		return ;
+	}
+  	bzero(buffer, this->mcConfBufSize);
+	if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
+	{
+		std::cerr << "receive failed " << errno << std::endl;
+		return ;
+	}
+	if (recv_return > 0)
+		this->mIncMsg.append(buffer);
+	std::ifstream 	ifile;
+	std::string		tmp;
+	std::string		msg;
+	ifile.open("test.html");
+	while (getline(ifile, tmp))
+	{
+		msg.append(tmp);
+		msg.append("\n");
+	}
+	// std::string msg = "HTTP/1.1 200 OK";
+	// msg.append(this->mConfig->getServerNames());
+	std::cout << msg.c_str() << std::endl;
+	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
+	std::cout << this->mIncMsg << std::endl;
+	this->closeSocket(this->mMsgFD);
 }
 
 void	httpServer::announce(void) const
@@ -140,4 +150,14 @@ void	httpServer::announce(void) const
 	std::cout << C_GREEN << "Server" << C_GREY << " ( " << this->mConfig->getHost() << ":";
 	std::cout << this->mConfig->getPort() << " ) " << this->mConfig->getServerNames();
 	std::cout << C_DEF << C_GREEN << " started" << C_DEF << std::endl;
+}
+
+int		httpServer::getMsgFD(void)
+{
+	return(this->mMsgFD);
+}
+
+int		httpServer::getSocket(void)
+{
+	return(this->mSocket);
 }
