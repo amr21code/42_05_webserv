@@ -48,38 +48,40 @@ httpServer::httpServer(httpConfig *config)
 	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
 	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
-	this->openSocket();
+	try
+	{
+		this->openSocket();
+	}
+	catch(const std::logic_error& e)
+	{
+		throw e;
+	}
 }
 
 httpServer::~httpServer(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer destructor" << std::endl;
-	this->closeSocket(this->mSocket);
+	this->closeSocket();
 }
 
 void httpServer::openSocket(void)
 {
-    if (DEBUG > 2)
+	if (DEBUG > 2)
 		std::cout << "httpServer openSocket" << std::endl;
-    this->mSocket = socket(this->mcConfDomain, this->mcConfComType, this->mcConfProtocol);
-    if (this->mSocket < 0)
-    {
-        std::cerr << "cannot open socket" << std::endl;
-		    return ;
-    }
+	this->mSocket = socket(this->mcConfDomain, this->mcConfComType, this->mcConfProtocol);
+	if (this->mSocket < 0)
+		throw std::logic_error("Error: cannot open socket");
 	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)))
-	{
-        std::cerr << "cannot bind socket " << errno << std::endl;
-		    return ;
-	}
+		throw std::logic_error("Error: cannot bind socket");
 }
 
-void httpServer::closeSocket(int socket)
+void httpServer::closeSocket(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer closeSocket" << std::endl;
-	close(socket);
+	if (this->mSocket >= 0)
+		close(this->mSocket);
 }
 
 void httpServer::log(std::string &message) const
@@ -97,7 +99,7 @@ void	httpServer::listenSocket(void)
 
 	if (listen(this->mSocket, 2))
 	{
-		std::cerr << "cannot listen" << std::endl;
+		std::cerr << "Error: listen() failed" << std::endl;
 		return ;
 	}
 	this->announce();
@@ -117,13 +119,13 @@ void	httpServer::receive(void)
 	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
 	if (this->mMsgFD < 0)
 	{
-		std::cerr << "cannot accept " << errno << std::endl;
+		std::cerr << "Error: accept() failed" << std::endl;
 		return ;
 	}
   	bzero(buffer, this->mcConfBufSize);
 	if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
 	{
-		std::cerr << "receive failed " << errno << std::endl;
+		std::cerr << "Error: receive() failed" << std::endl;
 		return ;
 	}
 	if (recv_return > 0)
@@ -142,7 +144,7 @@ void	httpServer::receive(void)
 	std::cout << msg.c_str() << std::endl;
 	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
 	std::cout << this->mIncMsg << std::endl;
-	this->closeSocket(this->mMsgFD);
+	close(this->mMsgFD);
 }
 
 void	httpServer::announce(void) const

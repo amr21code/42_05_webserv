@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/11 16:01:18 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/11 16:28:02 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class httpServer
 		httpServer(httpConfig *config);
 		~httpServer(void);
 		void	openSocket(void);
-		void	closeSocket(int socket);
+		void	closeSocket(void);
 		void	log(std::string &message) const;
 		void	listenSocket(void);
 		void	announce(void) const;
