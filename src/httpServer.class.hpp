@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   httpServer.hpp                                     :+:      :+:    :+:   */
+/*   httpServer.class.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 13:30:45 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/11 14:18:34 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <arpa/inet.h>
-#include "httpConfig.hpp"
-#include "colors.hpp"
+#include "httpConfig.class.hpp"
+#include "incl.hpp"
 #ifndef DEBUG
 #define DEBUG 0
 #endif

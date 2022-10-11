@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "httpServer.hpp"
-#include "httpConfig.hpp"
+#include "httpServer.class.hpp"
+#include "httpConfig.class.hpp"
 
 // Default constructor
 httpServer::httpServer(void)

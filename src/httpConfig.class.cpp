@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   httpConfig.cpp                                     :+:      :+:    :+:   */
+/*   httpConfig.class.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/30 11:51:38 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/11 14:16:38 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "httpConfig.hpp"
+#include "httpConfig.class.hpp"
 
 httpConfig::httpConfig(void)
 {

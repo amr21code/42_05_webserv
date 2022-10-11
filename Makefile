@@ -7,7 +7,7 @@ OBJ_DIR = obj/
 INC_DIR = inc/
 OS = $(shell uname)
 CC = c++
-CFLAGS = -Wall -Werror -Wextra -std=c++98 -g3 -pthread
+CFLAGS = -Wall -Werror -Wextra -std=c++98 -g3
 GREEN = \033[0;32m
 RED = \033[0;31m
 UNDO_COL = \033[0m
@@ -15,8 +15,9 @@ UNDO_COL = \033[0m
 
 # place all source files here
 SRC = 	$(SRC_DIR)main.cpp \
-		$(SRC_DIR)httpServer.cpp \
-		$(SRC_DIR)httpConfig.cpp \
+		$(SRC_DIR)httpServer.class.cpp \
+		$(SRC_DIR)httpConfig.class.cpp \
+		$(SRC_DIR)errorChecks.cpp
 		
 
 # takes all named source files and converts them to .o files in the /obj directory
