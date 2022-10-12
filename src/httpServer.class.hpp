@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/12 13:55:58 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/12 16:23:51 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <fstream>
 #include <arpa/inet.h>
 #include "httpConfig.class.hpp"
+// #include "httpRequest.class.hpp"
 #include "incl.hpp"
 #include <sys/epoll.h>
 #ifndef DEBUG
@@ -43,18 +44,19 @@ class httpServer
 		int		getMsgFD(void);
 		int		getSocket(void);
 		void	receive(void);
-		void	answer(struct epoll_event epevent);
+		void	answer(void);
 
 	private:
 		std::string			mServerName; //config
 		static const int	mcConfDomain = AF_INET;  //m = member, c = const, Conf = config
 		static const int	mcConfComType = SOCK_STREAM;
 		static const int	mcConfProtocol = 0;
-		static const int	mcConfBufSize = 30000;
+		static const int	mcConfBufSize = 30;
 		int					mSocket;
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;
 		httpConfig			*mConfig;
+		// httpRequest			*mRequest;
 
 		//new class
 		int					mMsgFD;

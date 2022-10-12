@@ -122,17 +122,24 @@ void	httpServer::receive(void)
 		std::cerr << "Error: accept() failed" << std::endl;
 		return ;
 	}
+  	// bzero(buffer, this->mcConfBufSize);
+	// if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
+	// {
+	// 	std::cerr << "Error: receive() failed" << std::endl;
+	// 	return ;
+	// }
+	this->mIncMsg = "";
   	bzero(buffer, this->mcConfBufSize);
-	if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
+	while ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
-		std::cerr << "Error: receive() failed" << std::endl;
-		return ;
-	}
-	if (recv_return > 0)
 		this->mIncMsg.append(buffer);
+  		bzero(buffer, this->mcConfBufSize);
+	}
+	// std::cout << "TEST" << std::endl;
+	// std::cout << this->mIncMsg << std::endl;
 }
 
-void	httpServer::answer(struct epoll_event epevent)
+void	httpServer::answer(void)
 {
 	std::ifstream 	ifile;
 	std::string		tmp;
@@ -145,11 +152,9 @@ void	httpServer::answer(struct epoll_event epevent)
 	}
 	// std::string msg = "HTTP/1.1 200 OK";
 	// msg.append(this->mConfig->getServerNames());
-	std::cout << msg.c_str() << std::endl;
-	if (epevent.events & EPOLLOUT)
-		std::cout << "test" << std::endl;
+	// std::cout << msg.c_str() << std::endl;
 	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
-	std::cout << this->mIncMsg << std::endl;
+	// std::cout << this->mIncMsg << std::endl;
 	close(this->mMsgFD);
 }
 
