@@ -6,13 +6,12 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/11 16:52:23 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/12 13:55:50 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.class.hpp"
 #include <exception>
-#include <sys/epoll.h>
 
 void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, int actualServers, int epfd)
 {
@@ -69,7 +68,7 @@ int	main(int argc, char **argv)
 	std::vector<httpServer *> 	serverVector;
 	int							epfd = epoll_create(1);
 	struct epoll_event			epevent;
-	epevent.events = EPOLLIN;
+	epevent.events = EPOLLIN|EPOLLOUT; // check later, if uploading files works without EPOLLOUT
 	try
 	{
 		if (epfd == -1)
@@ -105,7 +104,11 @@ int	main(int argc, char **argv)
 	{
 		event_count = epoll_wait(epfd, &epevent, countServers, 30000);
 		std::cout << event_count << std::endl;
-		serverVector[epevent.data.u32]->receive();
+		if (event_count > 0 && epevent.events & EPOLLIN)
+		{
+			serverVector[epevent.data.u32]->receive();
+			serverVector[epevent.data.u32]->answer(epevent);
+		}
 	}
 	destroyAllocs(confVector, serverVector, countServers, epfd);
 	return 0;

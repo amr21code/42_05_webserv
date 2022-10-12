@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/11 16:28:02 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/12 13:55:58 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <arpa/inet.h>
 #include "httpConfig.class.hpp"
 #include "incl.hpp"
+#include <sys/epoll.h>
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -42,6 +43,7 @@ class httpServer
 		int		getMsgFD(void);
 		int		getSocket(void);
 		void	receive(void);
+		void	answer(struct epoll_event epevent);
 
 	private:
 		std::string			mServerName; //config

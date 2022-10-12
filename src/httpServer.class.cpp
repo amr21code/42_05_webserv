@@ -130,6 +130,10 @@ void	httpServer::receive(void)
 	}
 	if (recv_return > 0)
 		this->mIncMsg.append(buffer);
+}
+
+void	httpServer::answer(struct epoll_event epevent)
+{
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		msg;
@@ -142,6 +146,8 @@ void	httpServer::receive(void)
 	// std::string msg = "HTTP/1.1 200 OK";
 	// msg.append(this->mConfig->getServerNames());
 	std::cout << msg.c_str() << std::endl;
+	if (epevent.events & EPOLLOUT)
+		std::cout << "test" << std::endl;
 	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
 	std::cout << this->mIncMsg << std::endl;
 	close(this->mMsgFD);
