@@ -135,8 +135,19 @@ void	httpServer::receive(void)
 		this->mIncMsg.append(buffer);
   		bzero(buffer, this->mcConfBufSize);
 	}
+	try
+	{
+		// std::cout << this->mIncMsg << std::endl;
+		std::cout << "try" << std::endl;
+		this->mRequest = new httpRequest(this->mIncMsg);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		this->errorHandler(e.what());
+	}
+	this->answer();
 	// std::cout << "TEST" << std::endl;
-	// std::cout << this->mIncMsg << std::endl;
 }
 
 void	httpServer::answer(void)
@@ -156,6 +167,53 @@ void	httpServer::answer(void)
 	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
 	// std::cout << this->mIncMsg << std::endl;
 	close(this->mMsgFD);
+}
+
+void	httpServer::answer(std::string file)
+{
+	std::ifstream 	ifile;
+	std::string		tmp;
+	std::string		msg;
+	ifile.open(file.c_str());
+	while (getline(ifile, tmp))
+	{
+		msg.append(tmp);
+		msg.append("\n");
+	}
+	// std::string msg = "HTTP/1.1 200 OK";
+	// msg.append(this->mConfig->getServerNames());
+	// std::cout << msg.c_str() << std::endl;
+	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
+	// std::cout << this->mIncMsg << std::endl;
+	close(this->mMsgFD);
+}
+
+void	httpServer::errorHandler(std::string error)
+{
+	int	errorNo = 0;
+
+	errorNo = atoi(error.c_str());
+	switch (errorNo)
+	{
+		case 400:
+			this->answer("./www/errors/400bad_request.html");
+			break;
+
+		case 401:
+			this->answer("./www/errors/401unauthorized.html");
+			break;
+
+		case 402:
+			break;
+
+		case 403:
+			this->answer("./www/errors/403forbidden.html");
+			break;
+
+		case 404:
+			this->answer("./www/errors/404not_found.html");
+			break;
+	}
 }
 
 void	httpServer::announce(void) const

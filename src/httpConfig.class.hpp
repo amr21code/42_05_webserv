@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   httpConfig.hpp                                     :+:      :+:    :+:   */
+/*   httpConfig.class.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/09/28 18:53:50 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/13 14:19:56 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPCONFIG_HPP
-#define HTTPCONFIG_HPP
+#ifndef HTTPCONFIG_CLASS_HPP
+#define HTTPCONFIG_CLASS_HPP
 #include <string>
 #include <vector>
 #include <iostream>

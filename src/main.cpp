@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/12 16:48:56 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/13 15:10:29 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,6 @@ int	main(int argc, char **argv)
 		if (event_count > 0 && epevent.events & EPOLLIN)
 		{
 			serverVector[epevent.data.u32]->receive();
-			serverVector[epevent.data.u32]->answer();
 		}
 	}
 	destroyAllocs(confVector, serverVector, countServers, epfd);

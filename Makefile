@@ -17,6 +17,7 @@ UNDO_COL = \033[0m
 SRC = 	$(SRC_DIR)main.cpp \
 		$(SRC_DIR)httpServer.class.cpp \
 		$(SRC_DIR)httpConfig.class.cpp \
+		$(SRC_DIR)httpRequest.class.cpp \
 		$(SRC_DIR)errorChecks.cpp
 		
 

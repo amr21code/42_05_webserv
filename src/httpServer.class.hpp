@@ -6,12 +6,12 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/12 16:23:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/13 15:41:32 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPSERVER_HPP
-#define HTTPSERVER_HPP
+#ifndef HTTPSERVER_CLASS_HPP
+#define HTTPSERVER_CLASS_HPP
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -22,12 +22,11 @@
 #include <fstream>
 #include <arpa/inet.h>
 #include "httpConfig.class.hpp"
-// #include "httpRequest.class.hpp"
+#include "httpRequest.class.hpp"
 #include "incl.hpp"
 #include <sys/epoll.h>
-#ifndef DEBUG
-#define DEBUG 0
-#endif
+#include <sstream>
+
 
 class httpServer
 {
@@ -45,6 +44,8 @@ class httpServer
 		int		getSocket(void);
 		void	receive(void);
 		void	answer(void);
+		void	answer(std::string file);
+		void	errorHandler(std::string error);
 
 	private:
 		std::string			mServerName; //config
@@ -56,7 +57,7 @@ class httpServer
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;
 		httpConfig			*mConfig;
-		// httpRequest			*mRequest;
+		httpRequest			*mRequest;
 
 		//new class
 		int					mMsgFD;

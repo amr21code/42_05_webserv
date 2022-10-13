@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/11 14:19:12 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/13 14:30:37 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,16 @@
 # define C_BLUE "\033[34m"
 # define C_MAGENTA "\033[35m"
 # define C_WHITE "\033[37m"
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
+enum RequestType
+{
+	GET = 0,
+	POST,
+	DELETE
+};
 
 //errorChecks.cpp
 void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss);
