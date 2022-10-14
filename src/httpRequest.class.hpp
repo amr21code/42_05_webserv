@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/13 15:43:23 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/14 15:56:04 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@ class httpRequest
 		~httpRequest(void);
 
 	private:
-		int			mReqType;
+		std::string	mReqType;
 		std::string	mResource;
 		std::string	mHost;
 		int			mPort;
+		std::string mResponse;
 		// add stuff for POST/DELETE
 };
 
