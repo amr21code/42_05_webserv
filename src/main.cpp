@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/14 10:35:13 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/14 12:55:54 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,9 +104,9 @@ int	main(int argc, char **argv)
 	while (1)
 	{
 		event_count = epoll_wait(epfd, epevents, countServers, -1);
-		std::cout << event_count << std::endl;
+		std::cout << event_count << " errno " << errno << std::endl;
 		// std::cout << epevent.events << std::endl;
-		if (event_count > 0)// && epevent.events & EAGAIN)
+		if (event_count > 0) && epevent.events & EAGAIN)
 		{
 			for(int i = 0; i < event_count; i++)
 				serverVector[epevents[i].data.u32]->receive();

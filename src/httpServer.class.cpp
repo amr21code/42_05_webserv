@@ -130,17 +130,19 @@ void	httpServer::receive(void)
 	// }
 	this->mIncMsg.erase();
   	bzero(buffer, this->mcConfBufSize);
+	int i = 0;
 	while ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
 		this->mIncMsg.append(buffer);
   		bzero(buffer, this->mcConfBufSize);
+		std::cout << i << " " <<  this->mIncMsg << std::endl;
+		i++;
 	}
 	std::cout << "recv " << recv_return << std::endl;
 	if (this->mIncMsg.size() > 0)
 	{
 		try
 		{
-			// std::cout << this->mIncMsg << std::endl;
 			std::cout << "try" << std::endl;
 			this->mRequest = new httpRequest(this->mIncMsg);
 		}
