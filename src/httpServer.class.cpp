@@ -128,25 +128,29 @@ void	httpServer::receive(void)
 	// 	std::cerr << "Error: receive() failed" << std::endl;
 	// 	return ;
 	// }
-	this->mIncMsg = "";
+	this->mIncMsg.erase();
   	bzero(buffer, this->mcConfBufSize);
 	while ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
 		this->mIncMsg.append(buffer);
   		bzero(buffer, this->mcConfBufSize);
 	}
-	try
+	std::cout << "recv " << recv_return << std::endl;
+	if (this->mIncMsg.size() > 0)
 	{
-		// std::cout << this->mIncMsg << std::endl;
-		std::cout << "try" << std::endl;
-		this->mRequest = new httpRequest(this->mIncMsg);
+		try
+		{
+			// std::cout << this->mIncMsg << std::endl;
+			std::cout << "try" << std::endl;
+			this->mRequest = new httpRequest(this->mIncMsg);
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+			this->errorHandler(e.what());
+		}
+		this->answer();
 	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		this->errorHandler(e.what());
-	}
-	this->answer();
 	// std::cout << "TEST" << std::endl;
 }
 

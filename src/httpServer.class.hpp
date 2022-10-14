@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/13 15:41:32 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/14 10:38:40 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class httpServer
 		static const int	mcConfDomain = AF_INET;  //m = member, c = const, Conf = config
 		static const int	mcConfComType = SOCK_STREAM;
 		static const int	mcConfProtocol = 0;
-		static const int	mcConfBufSize = 30;
+		static const int	mcConfBufSize = 200;
 		int					mSocket;
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;

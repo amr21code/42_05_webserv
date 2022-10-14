@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/13 15:10:29 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/14 10:35:13 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,15 +99,17 @@ int	main(int argc, char **argv)
 			return (0);
 		}
 	}
+	struct epoll_event			epevents[countServers];
 	int	event_count = 0;
 	while (1)
 	{
-		event_count = epoll_wait(epfd, &epevent, countServers, 30000);
-		// std::cout << event_count << std::endl;
+		event_count = epoll_wait(epfd, epevents, countServers, -1);
+		std::cout << event_count << std::endl;
 		// std::cout << epevent.events << std::endl;
-		if (event_count > 0 && epevent.events & EPOLLIN)
+		if (event_count > 0)// && epevent.events & EAGAIN)
 		{
-			serverVector[epevent.data.u32]->receive();
+			for(int i = 0; i < event_count; i++)
+				serverVector[epevents[i].data.u32]->receive();
 		}
 	}
 	destroyAllocs(confVector, serverVector, countServers, epfd);
