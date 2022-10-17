@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/14 16:07:23 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/17 13:48:31 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@ httpRequest::httpRequest(std::string msg)
 	if (msg.find("HTTP/1.1") == msg.npos)
 		throw std::logic_error("403");
 	this->mReqType = msg.substr(0, msg.find(" "));
-	this->mResource = msg.substr(msg.find(" "), msg.find(" ", msg.find(" ") + 1) - msg.find(" "));
-
+	this->mResource = msg.substr(msg.find(" ") + 1, msg.find(" ", msg.find(" ") + 1) - msg.find(" "));
+//	
+//RESOURCE PARSING -> find requested file based on rules/config/routes
+//
 	std::cout << this->mReqType << " " << this->mResource << std::endl;
 	// std::stringstream ss;
 	// ss << msg;
@@ -41,4 +43,9 @@ httpRequest::~httpRequest(void)
 {
 	if (DEBUG > 2)
         std::cout << "httpConfig destructor" << std::endl;
+}
+
+std::string httpRequest::getResource(void) {
+
+	return (this->mResource);
 }

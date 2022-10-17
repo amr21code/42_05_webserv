@@ -44,6 +44,7 @@ httpServer::httpServer(httpConfig *config)
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
 	this->mConfig = config;
+	this->mRespCode = "200";
 	this->mSockAddr.sin_family = this->mcConfDomain;
 	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
 	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
@@ -147,7 +148,7 @@ void	httpServer::receive(void)
 		}
 		catch(const std::exception& e)
 		{
-			std::cerr << e.what() << '\n';
+			// std::cerr << e.what() << '\n';
 			this->errorHandler(e.what());
 		}
 		this->answer();
@@ -155,21 +156,66 @@ void	httpServer::receive(void)
 	// std::cout << "TEST" << std::endl;
 }
 
+std::string httpServer::IntToString(size_t a)
+{
+    std::ostringstream temp;
+    temp << a;
+    return temp.str();
+}
+
+void	httpServer::generateResponse(size_t fileSize)
+{
+	char buf[100];
+	time_t now = time(0);
+	struct tm tm = *gmtime(&now);
+	std::ifstream 	ifile;
+	struct stat fileStats;
+	timespec	modTime;
+	// if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
+	if (stat("test.html", &fileStats) == 0)
+		modTime = fileStats.st_mtim;
+	ifile.open(this->mRequest->getResource().c_str());
+	strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
+	this->mResponse = "HTTP/1.1 ";
+	this->mResponse.append(this->mRespCode);
+	this->mResponse.append(" OK\r\nDate: ");
+	this->mResponse.append(buf);
+	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)\r\nLast-Modified: ");
+	bzero(buf, 100);
+	strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&modTime.tv_sec));
+	this->mResponse.append(buf);
+	this->mResponse.append("\r\nContent-Length: ");
+	this->mResponse.append(this->IntToString(fileSize));
+	this->mResponse.append("\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n");
+}
+
 void	httpServer::answer(void)
 {
 	std::ifstream 	ifile;
 	std::string		tmp;
-	std::string		msg;
-	ifile.open("test.html");
+	std::string		fileContent;
+	ifile.open(this->mRequest->getResource().c_str());
+	try
+	{
+		if (!ifile.good())
+			throw std::logic_error("404");
+	}
+	catch(const std::logic_error& e)
+	{
+		this->errorHandler(e.what());
+	}
 	while (getline(ifile, tmp))
 	{
-		msg.append(tmp);
-		msg.append("\n");
+		fileContent.append(tmp);
+		fileContent.append("\r\n");
 	}
+	this->generateResponse(fileContent.size());
+	this->mResponse.append(fileContent);
+	std::cout << this->mResponse << std::endl;
 	// std::string msg = "HTTP/1.1 200 OK";
 	// msg.append(this->mConfig->getServerNames());
 	// std::cout << msg.c_str() << std::endl;
-	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
+	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
 	// std::cout << this->mIncMsg << std::endl;
 	close(this->mMsgFD);
 }
@@ -178,18 +224,17 @@ void	httpServer::answer(std::string file)
 {
 	std::ifstream 	ifile;
 	std::string		tmp;
-	std::string		msg;
+	std::string		fileContent;
 	ifile.open(file.c_str());
 	while (getline(ifile, tmp))
 	{
-		msg.append(tmp);
-		msg.append("\n");
+		fileContent.append(tmp);
+		fileContent.append("\r\n");
 	}
-	// std::string msg = "HTTP/1.1 200 OK";
-	// msg.append(this->mConfig->getServerNames());
-	// std::cout << msg.c_str() << std::endl;
-	send(this->mMsgFD, msg.c_str(), msg.size(), 0);
-	// std::cout << this->mIncMsg << std::endl;
+	this->generateResponse(fileContent.size());
+	this->mResponse.append(fileContent);
+	// std::cout << this->mResponse << std::endl;
+	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
 	close(this->mMsgFD);
 }
 
@@ -198,6 +243,7 @@ void	httpServer::errorHandler(std::string error)
 	int	errorNo = 0;
 
 	errorNo = atoi(error.c_str());
+	this->mRespCode = error;
 	switch (errorNo)
 	{
 		case 400:

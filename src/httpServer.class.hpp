@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/14 12:49:50 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/17 14:25:56 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <cerrno> //entfernen
+#include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <cstring>
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <arpa/inet.h>
+#include <sstream>
 #include "httpConfig.class.hpp"
 #include "httpRequest.class.hpp"
 #include "incl.hpp"
-#include <sys/epoll.h>
-#include <sstream>
-
 
 class httpServer
 {
@@ -46,24 +47,26 @@ class httpServer
 		void	answer(void);
 		void	answer(std::string file);
 		void	errorHandler(std::string error);
+		void	generateResponse(size_t fileSize);
+		std::string IntToString(size_t a);
 
 	private:
-		std::string			mServerName; //config
+		//config
 		static const int	mcConfDomain = AF_INET;  //m = member, c = const, Conf = config
 		static const int	mcConfComType = SOCK_STREAM;
 		static const int	mcConfProtocol = 0;
 		static const int	mcConfBufSize = 100;
+		std::string			mServerName; //config
 		int					mSocket;
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;
 		httpConfig			*mConfig;
+		// request
 		httpRequest			*mRequest;
-
-		//new class
 		int					mMsgFD;
 		std::string			mIncMsg;
-
-
-		
+		// response
+		std::string			mResponse;
+		std::string			mRespCode;
 };
 #endif
