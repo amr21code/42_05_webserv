@@ -57,17 +57,17 @@ httpServer::httpServer(httpConfig *config)
 	{
 		throw e;
 	}
-	std::vector<std::map<std::string, std::string> > temp = config->getConfLocations();
-	std::vector<std::map<std::string, std::string> >::iterator it = temp.begin();
-	std::map<std::string, std::string>::iterator ite = it->begin();
-	for (; it != temp.end(); it++)
-	{
-		std::cout << "--- new ---" << std::endl;
-		for (ite = it->begin(); ite != it->end() ; ite++)
-		{
-			std::cout << ite->first << " -> " << ite->second << std::endl;
-		}
-	}
+	// std::vector<std::map<std::string, std::string> > temp = config->getConfLocations();
+	// std::vector<std::map<std::string, std::string> >::iterator it = temp.begin();
+	// std::map<std::string, std::string>::iterator ite = it->begin();
+	// for (; it != temp.end(); it++)
+	// {
+	// 	std::cout << "--- new ---" << std::endl;
+	// 	for (ite = it->begin(); ite != it->end() ; ite++)
+	// 	{
+	// 		std::cout << ite->first << " -> " << ite->second << std::endl;
+	// 	}
+	// }
 
 }
 

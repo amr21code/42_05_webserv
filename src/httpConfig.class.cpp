@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/18 17:03:11 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/18 17:33:21 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,8 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 		{
 			if (it->second == "")
 				it->second = this->mConfigDefault[it->first];
+			if (it->first == "location" && it->second[it->second.size() - 1] != '/')
+				it->second.append("/");
 			// std::cout << it->first << " " << it->second << std::endl;
 		}
 	}

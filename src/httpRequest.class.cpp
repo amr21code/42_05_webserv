@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/18 16:47:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/18 17:30:53 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ httpRequest::httpRequest(void)
 }
 httpRequest::httpRequest(std::string msg, httpConfig config)
 {
-	(void) config;
 	std::string	tempResource;
 	if (DEBUG > 2)
 		std::cout << "httpConfig constructor with message" << std::endl;
@@ -29,7 +28,12 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 		throw std::logic_error("403");
 	this->mReqType = msg.substr(0, msg.find(" "));
 	this->mResource = msg.substr(msg.find(" ") + 1, msg.find(" ", msg.find(" ") + 1) - msg.find(" ") - 1);
-	// if (this->mResource[this->mResource.size() - 1] == '/')
+	std::vector<std::map<std::string, std::string> >::iterator it = config.getConfLocations().begin();
+	for (; it != config.getConfLocations().end(); it++)
+	{
+		if (this->mResource[this->mResource.size() - 1] == '/')
+			std::cout << std::endl;
+	}
 
 
 //	
