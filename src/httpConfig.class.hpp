@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/17 15:38:28 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/18 17:01:57 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,10 @@ class httpConfig
         httpConfig(std::string configPath, int elem);
         ~httpConfig(void);
 
-		std::string				    getServerNames(void);
-        std::string                 getHost(void);
-        int			                 getPort(void);
+		std::string				   							getServerNames(void);
+        std::string											getHost(void);
+        int													getPort(void);
+		std::vector<std::map <std::string, std::string> >	&getConfLocations(void);
         // std::string					getErrors(void);
 		// int							getMaxBodySize(void);
 		// std::vector<std::string>	getMethods(void);
@@ -48,7 +49,7 @@ class httpConfig
 		std::map<std::string, std::string>					mConfigMap;
 		std::map<std::string, std::string>					mConfigDefault;
 		std::map<std::string, std::string> 					mStdLocation;
-		std::vector<std::map<std::string, std::string> > 	mConfLocations;
+		std::vector<std::map <std::string, std::string> > 	mConfLocations;
 		// std::string					mErrors; // filename / object
 		// int							mMaxBodySize; //max 1M
 		// std::vector<std::string>	mMethods;

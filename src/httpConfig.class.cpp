@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/17 16:00:49 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/18 17:03:11 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,21 +96,20 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 					this->mConfLocations.push_back(this->mStdLocation);
 				while (getline(ss, confLine))
 				{
+					confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
+					if (confLine.find("</location>") < confLine.npos) // just to skip
+						break ;
 					tmp = explode(confLine, ':');
 					std::map<std::string, std::string>::iterator it;
 					for (it = this->mConfLocations[i].begin(); it != this->mConfLocations[i].end(); it++)
 					{
-						std::cout << it->first << "- -" << tmp[0] << std::endl;
 						if (it->first == tmp[0])
 								break ;
 					}
-// **************** findet scheinbar nicht das keyword -> ggf leading spaces schuld?					
 					if (it == this->mConfLocations[i].end())
 						throw std::logic_error("Error (2): crap inside server");
 					if (this->mConfLocations[i][tmp[0]] == "")
 						this->mConfLocations[i][tmp[0]] = tmp[1];
-					if (confLine.find("</location>") < confLine.npos) // just to skip
-						break ;
 				}
 				i++;
 			}
@@ -130,7 +129,7 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 		{
 			if (it->second == "")
 				it->second = this->mConfigDefault[it->first];
-			std::cout << it->first << " " << it->second << std::endl;
+			// std::cout << it->first << " " << it->second << std::endl;
 		}
 	}
 }
@@ -148,12 +147,14 @@ void	httpConfig::mInitHttpConf(void)
 	this->mStdLocation["index"] = "";
 	this->mStdLocation["autoindex"] = "";
 	this->mStdLocation["redirect"] = "";
-	this->mStdLocation["zzzend"] = "";
+	this->mStdLocation["location"] = "";
+	this->mStdLocation["allowed_methods"] = "";
+	this->mStdLocation["dirlisting"] = "";
 	this->mConfLocations.push_back(this->mStdLocation);
 	
 	this->mConfigDefault["server_names"] = "webserv";
 	this->mConfigDefault["host"] = "0.0.0.0";
-	this->mConfigDefault["port"] = "80";
+	this->mConfigDefault["port"] = "2000";
 	this->mConfigDefault["error_page"] = "./www/errors";
 	this->mConfigDefault["client_max_body_size"] = "1000000";
 	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
@@ -161,6 +162,9 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["root"] = "/home/pi/projects/C05_webserv/42_05_webserv/www/html/";
 	this->mConfigDefault["index"] = "index.php,index.html";
 	this->mConfigDefault["autoindex"] = "1";
+	this->mConfigDefault["location"] = "/";
+	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
+	this->mConfigDefault["dirlisting"] = "0";
 	this->mConfigDefault["redirect"] = "return 301 index.html https://www.google.com/";
 }
 
@@ -179,6 +183,10 @@ int httpConfig::getPort(void)
     return (atoi(this->mConfigMap["port"].c_str()));
 }
 
+std::vector<std::map <std::string, std::string> > &httpConfig::getConfLocations(void)
+{
+	return (this->mConfLocations);
+}
 // std::string httpConfig::getErrors(void)
 // {
 // }
