@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/18 15:02:25 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/19 17:07:42 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class httpRequest
 	private:
 		std::string	mReqType;
 		std::string	mResource;
+		bool		mDirListing;
 		std::string	mHost;
 		int			mPort;
 		

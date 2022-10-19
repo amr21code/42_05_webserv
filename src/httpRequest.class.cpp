@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 16:23:02 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/19 17:08:26 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	size_t		resLength = 0;
 	size_t		locNb = -1;
 	size_t		i = 0;
+	this->mDirListing = false;
 	if (DEBUG > 2)
 		std::cout << "httpConfig constructor with message" << std::endl;
 	std::cout << msg << std::endl;
@@ -56,6 +57,37 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 		// 	std::cout << "location unsuccessful " << tempResourceDir << std::endl;
 		// tempResourceFile = this->mResource.substr(this->mResource.find_last_of('/') + 1); FIND INDEX
 		i++;
+	}
+	if (config.getConfLocations()[locNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
+		throw std::logic_error("405");
+	this->mResource = config.getConfLocations()[locNb]["root"];
+	tempResourceDir.erase(0, locNb);
+	this->mResource.append(tempResourceDir);
+	if (tempResourceFile.size())
+		this->mResource.append(tempResourceFile);
+	else
+	{
+		if (!config.getConfLocations()[locNb]["autoindex"].compare("off"))
+		{
+			std::vector<std::string> tmp = explode(config.getConfLocations()[locNb]["index"], ',');
+			std::string	tmpResource;
+			for (int j = 0; j < tmp.size(); j++)
+			{
+				tmpResource = this->mResource;
+				std::ifstream test(tmpResource.append(tmp[j]));
+    			if (test.good())
+				{
+					this->mResource = tmpResource;
+					test.close();
+					break;
+				}
+				test.close();
+			}
+		}
+		if (this->mResource[this->mResource.size() - 1] != '/' && config.getConfLocations()[locNb]["dirlisting"].compare("on"))
+		{
+			this->mDirListing = true;
+		}
 	}
 	// if not found -> invalid request
 	// std::cout << "i " << locNb << std::endl;

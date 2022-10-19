@@ -276,6 +276,12 @@ void	httpServer::errorHandler(std::string error)
 		case 404:
 			this->answer("./www/errors/404not_found.html");
 			break;
+		case 405:
+			this->answer("./www/errors/405method_not_allowed.html");
+			break;
+		
+		default:
+			this->answer("./www/errors/000default.html");
 	}
 }
 

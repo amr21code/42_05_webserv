@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 14:07:16 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/19 17:09:52 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,6 @@ httpConfig::~httpConfig(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpConfig destructor" << std::endl;
-}
-
-std::vector<std::string> httpConfig::explode(std::string confLine, char c)
-{
-	std::vector<std::string> ret_vector;
-
-	size_t colonPos = confLine.find(c);
-	
-	ret_vector.push_back(confLine.substr(0, colonPos));
-	ret_vector.push_back(confLine.substr(colonPos + 1, confLine.length() - 1));
-
-	
-	return (ret_vector);
 }
 
 void httpConfig::mReadConfig(std::string configPath, int elem)
@@ -165,7 +152,6 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["index"] = "index.php,index.html";
 	this->mConfigDefault["autoindex"] = "1";
 	this->mConfigDefault["location"] = "/";
-	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
 	this->mConfigDefault["dirlisting"] = "0";
 	this->mConfigDefault["redirect"] = "return 301 index.html https://www.google.com/";
 }
