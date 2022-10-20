@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 16:31:19 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/20 17:41:33 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ int	main(int argc, char **argv)
 	while (1)
 	{
 		event_count = epoll_wait(epfd, epevents, countServers, 30000);
-		// std::cout << event_count << std::endl;
+		std::cout << event_count << std::endl;
 		// std::cout << epevent.events << std::endl;
 		if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
 		{
@@ -116,4 +116,3 @@ int	main(int argc, char **argv)
 	destroyAllocs(confVector, serverVector, countServers, epfd);
 	return 0;
 }
-
