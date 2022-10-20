@@ -126,7 +126,9 @@ void	httpServer::listenSocket(void)
 void	httpServer::receive(void)
 {
 	int		addrlen = sizeof(this->mSockAddr);
-	char	buffer[this->mcConfBufSize + 1];
+	std::vector<char> buffer(mcConfBufSize + 1, '\0');
+	//char* buffer = new char[this->mcConfBufSize + 1];
+	//char	buffer[this->mcConfBufSize + 1];
 	int		recv_return = 1;
 
 	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
@@ -142,18 +144,19 @@ void	httpServer::receive(void)
 	// 	return ;
 	// }
 	this->mIncMsg = "";
-  	bzero(buffer, this->mcConfBufSize);
+  	//bzero(buffer, this->mcConfBufSize);
 	buffer[0] = 42;
 	// int i = 0;
-	while ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, MSG_DONTWAIT)) > 0)
+	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
-		std::cout << "i" << this->mIncMsg << std::endl;
-		std::cout << "b" << buffer << std::endl;
+		//std::cout << "i" << this->mIncMsg << std::endl;
+		//std::cout << "b" << buffer.data() << std::endl;
 		if (this->mIncMsg.size() == 0)
-			this->mIncMsg = buffer;
+			this->mIncMsg = buffer.data();
 		else
-			this->mIncMsg.append(buffer);
-  		bzero(buffer, this->mcConfBufSize);
+			this->mIncMsg.append(buffer.data());
+		buffer.assign(this->mcConfBufSize + 1, '\0');
+  		//bzero(buffer, this->mcConfBufSize);
 		// std::cout << i << " " <<  this->mIncMsg << std::endl;
 		// i++;
 	}

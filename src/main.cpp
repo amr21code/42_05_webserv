@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 17:41:33 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/20 22:24:51 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,11 @@ int	main(int argc, char **argv)
 		if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
 		{
 			for(int i = 0; i < event_count; i++)
+			{
+				//std::cout<< "servers " << countServers <<" data.u32 "<< epevents[i].data.u32 << std::endl;
+				//std::cout<< "socket " << countServers <<serverVector[epevents[i].data.u32]->getSocket() << std::endl;
 				serverVector[epevents[i].data.u32]->receive();
+			}
 		}
 	}
 	destroyAllocs(confVector, serverVector, countServers, epfd);
