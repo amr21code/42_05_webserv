@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 17:09:52 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/20 16:19:39 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["server_names"] = "webserv";
 	this->mConfigDefault["host"] = "0.0.0.0";
 	this->mConfigDefault["port"] = "2000";
-	this->mConfigDefault["error_page"] = "./www/errors";
+	this->mConfigDefault["error_page"] = "./www/errors/";
 	this->mConfigDefault["client_max_body_size"] = "1000000";
 	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
 	this->mConfigDefault["CGI"] = "php,py";
@@ -174,6 +174,16 @@ int httpConfig::getPort(void)
 std::vector<std::map <std::string, std::string> > &httpConfig::getConfLocations(void)
 {
 	return (this->mConfLocations);
+}
+
+std::map<std::string, std::string>	httpConfig::getConfigMap(void)
+{
+	return (this->mConfigMap);
+}
+
+std::map<std::string, std::string>	httpConfig::getDefaultMap(void)
+{
+	return(this->mConfigDefault);
 }
 // std::string httpConfig::getErrors(void)
 // {

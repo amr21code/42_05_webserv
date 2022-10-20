@@ -44,7 +44,7 @@ httpServer::httpServer(httpConfig *config)
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
 	this->mConfig = config;
-	this->mRespCode = "200";
+	this->mRespCode = "200 OK";
 	this->mSockAddr.sin_family = this->mcConfDomain;
 	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
 	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
@@ -151,6 +151,7 @@ void	httpServer::receive(void)
 		// std::cout << i << " " <<  this->mIncMsg << std::endl;
 		// i++;
 	}
+	std::cout << this->mIncMsg << std::endl;
 	if (this->mIncMsg.size() > 0)
 	{
 		try
@@ -183,14 +184,14 @@ void	httpServer::generateResponse(size_t fileSize)
 	std::ifstream 	ifile;
 	struct stat fileStats;
 	timespec	modTime;
-	// if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
-	if (stat("test.html", &fileStats) == 0)
+	// if (stat("test.html", &fileStats) == 0)
+	if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
 		modTime = fileStats.st_mtim;
 	ifile.open(this->mRequest->getResource().c_str());
 	strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	this->mResponse = "HTTP/1.1 ";
 	this->mResponse.append(this->mRespCode);
-	this->mResponse.append(" OK\r\nDate: ");
+	this->mResponse.append("\r\nDate: ");
 	this->mResponse.append(buf);
 	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)\r\nLast-Modified: ");
 	bzero(buf, 100);
@@ -206,11 +207,14 @@ void	httpServer::answer(void)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
+	// std::cout << this->mRequest->getResource() << std::endl;
 	ifile.open(this->mRequest->getResource().c_str());
 	try
 	{
+		// if (ifs.peek() == std::ifstream::traits_type::eof())
+
 		if (!ifile.good())
-			throw std::logic_error("404");
+			throw std::logic_error("404 Not Found");
 	}
 	catch(const std::logic_error& e)
 	{
@@ -223,12 +227,13 @@ void	httpServer::answer(void)
 	}
 	this->generateResponse(fileContent.size());
 	this->mResponse.append(fileContent);
-	std::cout << this->mResponse << std::endl;
+	// std::cout << this->mResponse << std::endl;
 	// std::string msg = "HTTP/1.1 200 OK";
 	// msg.append(this->mConfig->getServerNames());
 	// std::cout << msg.c_str() << std::endl;
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
 	// std::cout << this->mIncMsg << std::endl;
+	ifile.close();
 	close(this->mMsgFD);
 }
 
@@ -237,7 +242,14 @@ void	httpServer::answer(std::string file)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
-	ifile.open(file.c_str());
+	this->mRequest = new httpRequest(file, *this->mConfig, 1);
+	ifile.open(this->mRequest->getResource().c_str());
+	if (!ifile.good())
+	{
+		ifile.close();
+		this->mRequest->setResource(this->mConfig->getDefaultMap()["error_page"], file);
+		ifile.open(this->mRequest->getResource().c_str());
+	}
 	while (getline(ifile, tmp))
 	{
 		fileContent.append(tmp);
@@ -259,29 +271,32 @@ void	httpServer::errorHandler(std::string error)
 	switch (errorNo)
 	{
 		case 400:
-			this->answer("./www/errors/400bad_request.html");
+			this->answer("400bad_request.html");
 			break;
 
 		case 401:
-			this->answer("./www/errors/401unauthorized.html");
+			this->answer("401unauthorized.html");
 			break;
 
 		case 402:
 			break;
 
 		case 403:
-			this->answer("./www/errors/403forbidden.html");
+			this->answer("403forbidden.html");
 			break;
 
 		case 404:
-			this->answer("./www/errors/404not_found.html");
+			this->answer("404not_found.html");
 			break;
 		case 405:
-			this->answer("./www/errors/405method_not_allowed.html");
+			this->answer("405method_not_allowed.html");
+			break;
+		case 505:
+			this->answer("505httpvernotsupported.html");
 			break;
 		
 		default:
-			this->answer("./www/errors/000default.html");
+			this->answer("000default.html");
 	}
 }
 

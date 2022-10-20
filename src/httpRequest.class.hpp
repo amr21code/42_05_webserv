@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 17:07:42 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/20 16:18:50 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,11 @@ class httpRequest
     public:
 		httpRequest(void);
 		httpRequest(std::string msg, httpConfig config);
+		httpRequest(std::string errorFile, httpConfig config, int flag);
 		~httpRequest(void);
 		
 		std::string getResource(void);
+		void		setResource(std::string defFolder, std::string errFile);
 
 	private:
 		std::string	mReqType;

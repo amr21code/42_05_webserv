@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/18 17:01:57 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/20 16:19:01 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include "incl.hpp"
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -36,11 +37,13 @@ class httpConfig
         std::string											getHost(void);
         int													getPort(void);
 		std::vector<std::map <std::string, std::string> >	&getConfLocations(void);
+		std::map<std::string, std::string>					getConfigMap(void);
+		std::map<std::string, std::string>					getDefaultMap(void);
         // std::string					getErrors(void);
 		// int							getMaxBodySize(void);
 		// std::vector<std::string>	getMethods(void);
 		// std::vector<std::string>	getCGI(void);
-		std::vector<std::string> explode(std::string confLine, char c);
+		// std::vector<std::string> explode(std::string confLine, char c);
 
 	private:
 		// std::vector<std::string>	mServerNames;
