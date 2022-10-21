@@ -6,7 +6,7 @@
 /*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 22:24:51 by djedasch         ###   ########.fr       */
+/*   Updated: 2022/10/21 09:19:01 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, int actualServers, int epfd)
 {
+	if (DEBUG > 2)
+		std::cout << "main destroyAllocs" << std::endl;
 	for (long unsigned int i = 0; i < static_cast<long unsigned int> (actualServers); i++)
 	{
 		if (confVector.size() > i)
@@ -35,6 +37,8 @@ void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer 
 
 void	*startServer(void *arg)
 {
+	if (DEBUG > 2)
+		std::cout << "main startServer" << std::endl;
 	httpServer *tmp = (httpServer *)arg;
 	tmp->listenSocket();
 	return (0);

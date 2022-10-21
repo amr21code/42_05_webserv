@@ -106,11 +106,13 @@ void httpServer::log(std::string &message) const
 
 void	httpServer::listenSocket(void)
 {
+	if (DEBUG > 2)
+		std::cout << "httpServer listenSocket()" << std::endl;
 	// int		addrlen = sizeof(this->mSockAddr);
 	// char	buffer[this->mcConfBufSize];
 	// int		recv_return = 1;
 
-	if (listen(this->mSocket, 2))
+	if (listen(this->mSocket, 1))
 	{
 		std::cerr << "Error: listen() failed" << std::endl;
 		return ;
@@ -125,6 +127,8 @@ void	httpServer::listenSocket(void)
 
 void	httpServer::receive(void)
 {
+    if (DEBUG > 2)
+		std::cout << "httpServer receive" << std::endl;
 	int		addrlen = sizeof(this->mSockAddr);
 	std::vector<char> buffer(mcConfBufSize + 1, '\0');
 	//char* buffer = new char[this->mcConfBufSize + 1];
@@ -149,6 +153,8 @@ void	httpServer::receive(void)
 	// int i = 0;
 	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
+		if (DEBUG > 2)
+			std::cout << "httpServer received something" << std::endl;
 		//std::cout << "i" << this->mIncMsg << std::endl;
 		//std::cout << "b" << buffer.data() << std::endl;
 		if (this->mIncMsg.size() == 0)
@@ -160,7 +166,7 @@ void	httpServer::receive(void)
 		// std::cout << i << " " <<  this->mIncMsg << std::endl;
 		// i++;
 	}
-	std::cout << this->mIncMsg << std::endl;
+	std::cout <<"message: " << this->mIncMsg << std::endl;
 	if (this->mIncMsg.size() > 0)
 	{
 		try
@@ -176,7 +182,12 @@ void	httpServer::receive(void)
 		this->answer();
 	}
 	// std::cout << "TEST" << std::endl;
+	else
+	{
+		this->errorHandler("400bad_request.html");
+	} 
 }
+
 
 std::string httpServer::IntToString(size_t a)
 {
@@ -187,6 +198,8 @@ std::string httpServer::IntToString(size_t a)
 
 void	httpServer::generateResponse(size_t fileSize)
 {
+	if (DEBUG > 2)
+		std::cout << "httpServer generateResponse" << std::endl;
 	char buf[100];
 	time_t now = time(0);
 	struct tm tm = *gmtime(&now);
@@ -213,6 +226,8 @@ void	httpServer::generateResponse(size_t fileSize)
 
 void	httpServer::answer(void)
 {
+	if (DEBUG > 2)
+		std::cout << "httpServer answer" << std::endl;
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
@@ -248,6 +263,8 @@ void	httpServer::answer(void)
 
 void	httpServer::answer(std::string file)
 {
+	if (DEBUG > 2)
+		std::cout << "httpServer answer with file" << std::endl;
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
@@ -273,6 +290,8 @@ void	httpServer::answer(std::string file)
 
 void	httpServer::errorHandler(std::string error)
 {
+	if (DEBUG > 2)
+		std::cout << "httpServer errorHandler" << std::endl;
 	int	errorNo = 0;
 
 	errorNo = atoi(error.c_str());

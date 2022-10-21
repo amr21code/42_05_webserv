@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   incl.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 16:54:28 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/21 09:13:06 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define C_MAGENTA "\033[35m"
 # define C_WHITE "\033[37m"
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 4
 #endif
 
 #include <vector>
