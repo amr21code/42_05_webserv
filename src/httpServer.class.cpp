@@ -112,7 +112,7 @@ void	httpServer::listenSocket(void)
 	// char	buffer[this->mcConfBufSize];
 	// int		recv_return = 1;
 
-	if (listen(this->mSocket, 1))
+	if (listen(this->mSocket, 30000))
 	{
 		std::cerr << "Error: listen() failed" << std::endl;
 		return ;
@@ -149,7 +149,6 @@ void	httpServer::receive(void)
 	// }
 	this->mIncMsg = "";
   	//bzero(buffer, this->mcConfBufSize);
-	buffer[0] = 42;
 	// int i = 0;
 	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
