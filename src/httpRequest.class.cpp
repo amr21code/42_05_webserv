@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 17:04:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/21 15:16:47 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 httpRequest::httpRequest(void)
 {
 	if (DEBUG > 2)
-		std::cout << "httpConfig default constructor" << std::endl; 
+		std::cout << "httpRequest default constructor" << std::endl; 
 }
 
 httpRequest::httpRequest(std::string errorFile, httpConfig config)
@@ -26,8 +26,9 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config)
 	size_t		locNb = -1;
 	size_t		i = 0;
 	this->mDirListing = false;
+	this->mError = false;
 	if (DEBUG > 2)
-		std::cout << "httpConfig constructor with message" << std::endl;
+		std::cout << "httpRequest constructor with message" << std::endl;
 	// std::cout << errorFile << std::endl;
 	// std::cout << errorFile.find("HTTP/1.1") << " >= " << errorFile.npos << std::endl;
 	if (errorFile.find("HTTP/1.1") == errorFile.npos)
@@ -111,7 +112,8 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
 {
 	(void) flag;
 	if (DEBUG > 2)
-		std::cout << "httpConfig constructor for errors" << std::endl;
+		std::cout << "httpRequest constructor for errors" << std::endl;
+	this->mError = true;
 	this->mResource = config.getConfigMap()["error_page"];
 	this->mResource.append(errorFile);
 }
@@ -119,7 +121,7 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
 httpRequest::~httpRequest(void)
 {
 	if (DEBUG > 2)
-        std::cout << "httpConfig destructor" << std::endl;
+        std::cout << "httpRequest destructor" << std::endl;
 }
 
 std::string httpRequest::getResource(void) {

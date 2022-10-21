@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/21 09:19:01 by djedasch         ###   ########.fr       */
+/*   Updated: 2022/10/21 15:08:31 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,17 @@ int	main(int argc, char **argv)
 	int	event_count = 0;
 	while (1)
 	{
-		event_count = epoll_wait(epfd, epevents, countServers, 30000);
+		event_count = epoll_wait(epfd, epevents, 64, -1);
 		std::cout << event_count << std::endl;
+		try
+		{
+			if (event_count < 0)
+				throw std::logic_error("Error: epoll_wait() failed");
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+		}
 		// std::cout << epevent.events << std::endl;
 		if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
 		{

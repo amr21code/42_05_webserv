@@ -150,6 +150,22 @@ void	httpServer::receive(void)
 	this->mIncMsg = "";
   	//bzero(buffer, this->mcConfBufSize);
 	// int i = 0;
+	// while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, 0)) > 0)
+	// {
+	// 	if (DEBUG > 2)
+	// 		std::cout << "httpServer received something" << std::endl;
+	// 	//std::cout << "i" << this->mIncMsg << std::endl;
+	// 	//std::cout << "b" << buffer.data() << std::endl;
+	// 	if (this->mIncMsg.size() == 0)
+	// 		this->mIncMsg = buffer.data();
+	// 	else
+	// 		this->mIncMsg.append(buffer.data());
+	// 	buffer.assign(this->mcConfBufSize + 1, '\0');
+  	// 	//bzero(buffer, this->mcConfBufSize);
+	// 	// std::cout << i << " " <<  this->mIncMsg << std::endl;
+	// 	// i++;
+	// }
+	usleep(1000);
 	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
 		if (DEBUG > 2)
@@ -242,6 +258,7 @@ void	httpServer::answer(void)
 	catch(const std::logic_error& e)
 	{
 		this->errorHandler(e.what());
+		return ;
 	}
 	while (getline(ifile, tmp))
 	{
@@ -283,8 +300,11 @@ void	httpServer::answer(std::string file)
 	this->generateResponse(fileContent.size());
 	this->mResponse.append(fileContent);
 	// std::cout << this->mResponse << std::endl;
+	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
+	// flag MSG_DONTWAIT statt 0 und nach EAGAIN/EWOULDBLOCK abfragen
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
 	close(this->mMsgFD);
+	this->mRespCode = "200 OK";
 }
 
 void	httpServer::errorHandler(std::string error)

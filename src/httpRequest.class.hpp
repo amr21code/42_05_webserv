@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 16:18:50 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/21 15:16:24 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class httpRequest
 		bool		mDirListing;
 		std::string	mHost;
 		int			mPort;
+		bool		mError;
 		
 		// add stuff for POST/DELETE
 };
