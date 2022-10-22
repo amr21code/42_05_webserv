@@ -131,8 +131,6 @@ void	httpServer::receive(void)
 		std::cout << "httpServer receive" << std::endl;
 	int		addrlen = sizeof(this->mSockAddr);
 	std::vector<char> buffer(mcConfBufSize + 1, '\0');
-	//char* buffer = new char[this->mcConfBufSize + 1];
-	//char	buffer[this->mcConfBufSize + 1];
 	int		recv_return = 1;
 
 	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
@@ -141,30 +139,7 @@ void	httpServer::receive(void)
 		std::cerr << "Error: accept() failed" << std::endl;
 		return ;
 	}
-  	// bzero(buffer, this->mcConfBufSize);
-	// if ((recv_return = recv(this->mMsgFD, buffer, this->mcConfBufSize, 0)) < 0)
-	// {
-	// 	std::cerr << "Error: receive() failed" << std::endl;
-	// 	return ;
-	// }
 	this->mIncMsg = "";
-  	//bzero(buffer, this->mcConfBufSize);
-	// int i = 0;
-	// while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, 0)) > 0)
-	// {
-	// 	if (DEBUG > 2)
-	// 		std::cout << "httpServer received something" << std::endl;
-	// 	//std::cout << "i" << this->mIncMsg << std::endl;
-	// 	//std::cout << "b" << buffer.data() << std::endl;
-	// 	if (this->mIncMsg.size() == 0)
-	// 		this->mIncMsg = buffer.data();
-	// 	else
-	// 		this->mIncMsg.append(buffer.data());
-	// 	buffer.assign(this->mcConfBufSize + 1, '\0');
-  	// 	//bzero(buffer, this->mcConfBufSize);
-	// 	// std::cout << i << " " <<  this->mIncMsg << std::endl;
-	// 	// i++;
-	// }
 	usleep(1000);
 	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 	{
@@ -230,13 +205,18 @@ void	httpServer::generateResponse(size_t fileSize)
 	this->mResponse.append(this->mRespCode);
 	this->mResponse.append("\r\nDate: ");
 	this->mResponse.append(buf);
-	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)\r\nLast-Modified: ");
-	bzero(buf, 100);
-	strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&modTime.tv_sec));
-	this->mResponse.append(buf);
-	this->mResponse.append("\r\nContent-Length: ");
-	this->mResponse.append(this->IntToString(fileSize));
-	this->mResponse.append("\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n");
+	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)");
+	if (fileSize > 0)
+	{
+		this->mResponse.append("\r\nLast-Modified: ");
+		bzero(buf, 100);
+		strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&modTime.tv_sec));
+		this->mResponse.append(buf);
+		this->mResponse.append("\r\nContent-Length: ");
+		this->mResponse.append(this->IntToString(fileSize));
+		this->mResponse.append("\r\nContent-Type: text/html");
+	}
+	this->mResponse.append("\r\nConnection: close\r\n\r\n");
 }
 
 void	httpServer::answer(void)
@@ -244,36 +224,54 @@ void	httpServer::answer(void)
 	if (DEBUG > 2)
 		std::cout << "httpServer answer" << std::endl;
 	std::ifstream 	ifile;
+	std::ofstream 	ofile;
 	std::string		tmp;
 	std::string		fileContent;
-	// std::cout << this->mRequest->getResource() << std::endl;
-	ifile.open(this->mRequest->getResource().c_str());
-	try
-	{
-		// if (ifs.peek() == std::ifstream::traits_type::eof())
 
-		if (!ifile.good())
-			throw std::logic_error("404 Not Found");
-	}
-	catch(const std::logic_error& e)
+	if (!this->mRequest->getReqType().compare("PUT"))
 	{
-		this->errorHandler(e.what());
-		return ;
+		ofile.open(this->mRequest->getResource().c_str(), std::ofstream::binary);
+		std::cout << "path " << this->mRequest->getResource().c_str() << std::endl;
+		try
+		{
+			if (!ofile.is_open())
+				throw std::logic_error("4xx Permissions");
+		}
+		catch(const std::logic_error& e)
+		{
+			this->errorHandler(e.what());
+			return ;
+		}
+		// ofile << this->mRequest->getPayload();
+		ofile.write(this->mRequest->getPayload().c_str(), this->mRequest->getPayload().size());
+		ofile.close();
+		this->generateResponse(0);
 	}
-	while (getline(ifile, tmp))
+	else if (!this->mRequest->getReqType().compare("GET"))
 	{
-		fileContent.append(tmp);
-		fileContent.append("\r\n");
+		ifile.open(this->mRequest->getResource().c_str());
+		try
+		{
+			// if (ifs.peek() == std::ifstream::traits_type::eof())
+
+			if (!ifile.good())
+				throw std::logic_error("404 Not Found");
+		}
+		catch(const std::logic_error& e)
+		{
+			this->errorHandler(e.what());
+			return ;
+		}
+		while (getline(ifile, tmp))
+		{
+			fileContent.append(tmp);
+			fileContent.append("\r\n");
+		}
+		ifile.close();
+		this->generateResponse(fileContent.size());
+		this->mResponse.append(fileContent);
 	}
-	this->generateResponse(fileContent.size());
-	this->mResponse.append(fileContent);
-	// std::cout << this->mResponse << std::endl;
-	// std::string msg = "HTTP/1.1 200 OK";
-	// msg.append(this->mConfig->getServerNames());
-	// std::cout << msg.c_str() << std::endl;
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
-	// std::cout << this->mIncMsg << std::endl;
-	ifile.close();
 	close(this->mMsgFD);
 }
 

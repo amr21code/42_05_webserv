@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 16:19:01 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/22 15:59:13 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class httpConfig
 		std::vector<std::map <std::string, std::string> >	&getConfLocations(void);
 		std::map<std::string, std::string>					getConfigMap(void);
 		std::map<std::string, std::string>					getDefaultMap(void);
+		size_t												getMaxBodySize(void);
         // std::string					getErrors(void);
 		// int							getMaxBodySize(void);
 		// std::vector<std::string>	getMethods(void);

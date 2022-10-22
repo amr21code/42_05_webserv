@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/21 15:16:24 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/22 16:27:40 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@ class httpRequest
 		httpRequest(std::string errorFile, httpConfig config, int flag);
 		~httpRequest(void);
 		
-		std::string getResource(void);
+		std::string getResource(void) const;
+		std::string getReqType(void) const;
 		void		setResource(std::string defFolder, std::string errFile);
+		std::string	getPayload(void) const;
 
 	private:
 		std::string	mReqType;
@@ -36,6 +38,7 @@ class httpRequest
 		std::string	mHost;
 		int			mPort;
 		bool		mError;
+		std::string mPayload;
 		
 		// add stuff for POST/DELETE
 };

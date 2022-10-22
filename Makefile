@@ -42,7 +42,7 @@ $(NAME): $(OBJ)
 
 # removes all object files and the /obj directory and cleans libft
 clean:
-	-rm -r $(OBJ_DIR)
+	-rm -rf $(OBJ_DIR)
 	@echo "$(RED)Finished clean$(UNDO_COL)"
 
 # calls 'clean' and removes the executable

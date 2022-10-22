@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/20 16:19:39 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/22 16:49:46 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,8 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 				it->second = this->mConfigDefault[it->first];
 			if (it->first == "location" && it->second[it->second.size() - 1] != '/')
 				it->second.append("/");
+			if (it->first == "root" && it->second[it->second.size() - 1] != '/')
+				it->second.append("/");
 			// std::cout << it->first << " " << it->second << std::endl;
 		}
 	}
@@ -189,9 +191,10 @@ std::map<std::string, std::string>	httpConfig::getDefaultMap(void)
 // {
 // }
 
-// int httpConfig::getMaxBodySize(void) {
-	
-// };
+size_t httpConfig::getMaxBodySize(void) {
+
+	return(atoi(this->mConfigMap["client_max_body_size"].c_str()));	
+};
 
 // std::vector<std::string>	httpConfig::getMethods(void) {
 	

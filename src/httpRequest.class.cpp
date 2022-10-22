@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/21 15:16:47 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/22 16:54:36 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ httpRequest::httpRequest(void)
 		std::cout << "httpRequest default constructor" << std::endl; 
 }
 
-httpRequest::httpRequest(std::string errorFile, httpConfig config)
+httpRequest::httpRequest(std::string msg, httpConfig config)
 {
 	std::string	tempResourceDir = "/";
 	std::string	tempResourceFile;
@@ -29,12 +29,12 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config)
 	this->mError = false;
 	if (DEBUG > 2)
 		std::cout << "httpRequest constructor with message" << std::endl;
-	// std::cout << errorFile << std::endl;
-	// std::cout << errorFile.find("HTTP/1.1") << " >= " << errorFile.npos << std::endl;
-	if (errorFile.find("HTTP/1.1") == errorFile.npos)
+	if (msg.size() > config.getMaxBodySize())
+		throw std::logic_error("413 Request Entity Too Large");
+	if (msg.find("HTTP/1.1") == msg.npos)
 		throw std::logic_error("505 HTTP Version Not Supported");
-	this->mReqType = errorFile.substr(0, errorFile.find(" "));
-	this->mResource = errorFile.substr(errorFile.find(" ") + 1, errorFile.find(" ", errorFile.find(" ") + 1) - errorFile.find(" ") - 1);
+	this->mReqType = msg.substr(0, msg.find(" "));
+	this->mResource = msg.substr(msg.find(" ") + 1, msg.find(" ", msg.find(" ") + 1) - msg.find(" ") - 1);
 	if (this->mResource[this->mResource.size() - 1] != '/')
 	{
 		if (this->mResource.find_last_of(".") == this->mResource.npos)
@@ -43,7 +43,6 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config)
 		// std::cout << "Temp Resource Dir is: " << tempResourceDir << std::endl;
 		// std::cout << "Temp Resource File is: " << tempResourceFile << std::endl;
 	}
-	// APPEND '/' if no /  at the end of the path
 	tempResourceDir = this->mResource.substr(0, this->mResource.find_last_of('/') + 1);
 	std::vector<std::map<std::string, std::string> >::iterator itvec = config.getConfLocations().begin();
 	for (; itvec != config.getConfLocations().end(); itvec++)
@@ -52,22 +51,17 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config)
 		{
 			resLength = (*itvec)["location"].size();
 			locNb = i;
-			// do stuff
 		}
-		// 	std::cout << "location successful " << tempResourceDir << std::endl;
-		// else
-		// 	std::cout << "location unsuccessful " << tempResourceDir << std::endl;
-		// tempResourceFile = this->mResource.substr(this->mResource.find_last_of('/') + 1); FIND INDEX
 		i++;
 	}
 	if (config.getConfLocations()[locNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
 		throw std::logic_error("405 Method Not Allowed");
 	this->mResource = config.getConfLocations()[locNb]["root"];
-	tempResourceDir.erase(0, locNb);
+	tempResourceDir.erase(0, resLength);
 	this->mResource.append(tempResourceDir);
 	if (tempResourceFile.size())
 		this->mResource.append(tempResourceFile);
-	else
+	else if (!this->mReqType.compare("GET"))
 	{
 		if (config.getConfLocations()[locNb]["autoindex"].compare("off"))
 		{
@@ -96,16 +90,10 @@ httpRequest::httpRequest(std::string errorFile, httpConfig config)
 			throw std::logic_error("404 Not Found");
 		}
 	}
-	// if not found -> invalid request
-	// std::cout << "i " << locNb << std::endl;
-	// std::cout << "len " << resLength << std::endl;
-	// std::cout << config.getConfLocations()[locNb]["location"] << std::endl;
-
-
-//	
-//RESOURCE PARSING -> find requested file based on rules/config/routes
-//
-	// std::cout << this->mReqType << " -" << this->mResource << "-" << std::endl;
+	else
+		throw std::logic_error("403 Forbidden");
+	int payloadindex = msg.find("\r\n\r\n", 0);
+	this->mPayload = msg.substr(payloadindex + 4, std::string::npos);
 }
 
 httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
@@ -124,9 +112,19 @@ httpRequest::~httpRequest(void)
         std::cout << "httpRequest destructor" << std::endl;
 }
 
-std::string httpRequest::getResource(void) {
+std::string httpRequest::getResource(void) const {
 
 	return (this->mResource);
+}
+
+std::string httpRequest::getReqType(void) const {
+
+	return (this->mReqType);
+}
+
+std::string httpRequest::getPayload(void) const {
+
+	return (this->mPayload);
 }
 
 void httpRequest::setResource(std::string defFolder, std::string errFile) {
