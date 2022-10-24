@@ -1,0 +1,9 @@
+ /upload/test.ico HTTP/1.1
+User-Agent: PostmanRuntime/7.29.2
+Accept: */*
+Postman-Token: bae589b7-1294-4b7e-a822-db99fd3439ef
+Host: webserv.42:2001
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Length: 570687
+Content-Type: video/mp4

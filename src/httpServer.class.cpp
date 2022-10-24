@@ -140,21 +140,35 @@ void	httpServer::receive(void)
 		return ;
 	}
 	this->mIncMsg = "";
-	usleep(1000);
-	while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
+	// usleep(1000);
+	std::string tmp;
+	while (this->mIncMsg.size() == 0)
 	{
-		if (DEBUG > 2)
-			std::cout << "httpServer received something" << std::endl;
-		//std::cout << "i" << this->mIncMsg << std::endl;
-		//std::cout << "b" << buffer.data() << std::endl;
-		if (this->mIncMsg.size() == 0)
-			this->mIncMsg = buffer.data();
-		else
-			this->mIncMsg.append(buffer.data());
-		buffer.assign(this->mcConfBufSize + 1, '\0');
-  		//bzero(buffer, this->mcConfBufSize);
-		// std::cout << i << " " <<  this->mIncMsg << std::endl;
-		// i++;
+		while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
+		{
+			if (DEBUG > 2)
+				std::cout << "httpServer received something" << std::endl;
+			//std::cout << "i" << this->mIncMsg << std::endl;
+			//std::cout << "b" << buffer.data() << std::endl;
+	 		tmp = buffer.data();
+			if (this->mIncMsg.size() == 0)
+				this->mIncMsg = buffer.data();
+			else if (tmp.find("\r\n\r\n") == std::string::npos) // what if buffer ends in middle of \r\n\r\n ?
+				this->mIncMsg.append(tmp);
+			else
+			{
+				this->mIncMsg.append(tmp.c_str(), tmp.find("\r\n\r\n"));
+				// std::cout << tmp << std::endl;
+				break;
+			}
+			
+			buffer.assign(this->mcConfBufSize + 1, '\0');
+		
+			//bzero(buffer, this->mcConfBufSize);
+			// std::cout << i << " " <<  this->mIncMsg << std::endl;
+			// i++;
+			// std::cout << "test" << std::endl;
+		}
 	}
 	std::cout <<"message: " << this->mIncMsg << std::endl;
 	if (this->mIncMsg.size() > 0)

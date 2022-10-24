@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/22 16:54:36 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/24 13:38:47 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	else
 		throw std::logic_error("403 Forbidden");
 	int payloadindex = msg.find("\r\n\r\n", 0);
-	this->mPayload = msg.substr(payloadindex + 4, std::string::npos);
+	this->mPayload = msg.substr(payloadindex + 4);
 }
 
 httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
