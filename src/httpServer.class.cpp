@@ -161,16 +161,13 @@ void	httpServer::receive(void)
 				// std::cout << tmp << std::endl;
 				break;
 			}
-			
 			buffer.assign(this->mcConfBufSize + 1, '\0');
-		
 			//bzero(buffer, this->mcConfBufSize);
 			// std::cout << i << " " <<  this->mIncMsg << std::endl;
 			// i++;
 			// std::cout << "test" << std::endl;
 		}
 	}
-	std::cout <<"message: " << this->mIncMsg << std::endl;
 	if (this->mIncMsg.size() > 0)
 	{
 		try
@@ -183,6 +180,7 @@ void	httpServer::receive(void)
 			// std::cerr << e.what() << '\n';
 			this->errorHandler(e.what());
 		}
+		
 		this->answer();
 	}
 	// std::cout << "TEST" << std::endl;

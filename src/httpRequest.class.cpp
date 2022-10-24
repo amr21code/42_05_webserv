@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/24 13:38:47 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/24 16:00:32 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,83 @@ httpRequest::httpRequest(void)
 
 httpRequest::httpRequest(std::string msg, httpConfig config)
 {
+	if (DEBUG > 2)
+		std::cout << "httpRequest constructor with message" << std::endl;
+	std::vector<std::string> tmpLines;
+	std::vector<std::string> tmpElements;
+	this->mDirListing = false;
+	this->mError = false;
+	tmpLines = explode(msg, '\n');
+	std::vector<std::string>::iterator it = tmpLines.begin();
+	try // HERE IT DOES NOT READ INTO THE MAP PROPERLY
+	{
+		firstLineHandler(*(it), config);
+		for (++it; it < tmpLines.end(); it++)
+		{
+			tmpElements = explode(*it, ':');
+			this->mRequest[tmpElements[0]] = tmpElements[1]; 
+		}
+		std::map<std::string, std::string>::iterator ite = this->mRequest.begin();
+		for (; ite != this->mRequest.end(); ite++)
+		{
+			std::cout << ite->first << "-" << ite->second << std::endl;
+		}
+			std::cout << "FINISHED PRINTING FOR RALF" << std::endl;
+	}
+	catch(const std::logic_error& e)
+	{
+		throw e;
+	}
+	
+	// int payloadindex = msg.find("\r\n\r\n", 0);
+	// this->mPayload = msg.substr(payloadindex + 4);
+}
+
+httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
+{
+	(void) flag;
+	if (DEBUG > 2)
+		std::cout << "httpRequest constructor for errors" << std::endl;
+	this->mError = true;
+	this->mResource = config.getConfigMap()["error_page"];
+	this->mResource.append(errorFile);
+}
+
+httpRequest::~httpRequest(void)
+{
+	if (DEBUG > 2)
+        std::cout << "httpRequest destructor" << std::endl;
+}
+
+std::string httpRequest::getResource(void) const {
+
+	return (this->mResource);
+}
+
+std::string httpRequest::getReqType(void) const {
+
+	return (this->mReqType);
+}
+
+std::string httpRequest::getPayload(void) const {
+
+	return (this->mPayload);
+}
+
+void httpRequest::setResource(std::string defFolder, std::string errFile) {
+	
+	this->mResource = defFolder;
+	this->mResource.append(errFile);
+}
+
+void httpRequest::firstLineHandler(std::string msg, httpConfig config)
+{
 	std::string	tempResourceDir = "/";
 	std::string	tempResourceFile;
 	size_t		resLength = 0;
 	size_t		locNb = -1;
 	size_t		i = 0;
-	this->mDirListing = false;
-	this->mError = false;
-	if (DEBUG > 2)
-		std::cout << "httpRequest constructor with message" << std::endl;
+
 	if (msg.size() > config.getMaxBodySize())
 		throw std::logic_error("413 Request Entity Too Large");
 	if (msg.find("HTTP/1.1") == msg.npos)
@@ -92,43 +160,4 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	}
 	else
 		throw std::logic_error("403 Forbidden");
-	int payloadindex = msg.find("\r\n\r\n", 0);
-	this->mPayload = msg.substr(payloadindex + 4);
-}
-
-httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
-{
-	(void) flag;
-	if (DEBUG > 2)
-		std::cout << "httpRequest constructor for errors" << std::endl;
-	this->mError = true;
-	this->mResource = config.getConfigMap()["error_page"];
-	this->mResource.append(errorFile);
-}
-
-httpRequest::~httpRequest(void)
-{
-	if (DEBUG > 2)
-        std::cout << "httpRequest destructor" << std::endl;
-}
-
-std::string httpRequest::getResource(void) const {
-
-	return (this->mResource);
-}
-
-std::string httpRequest::getReqType(void) const {
-
-	return (this->mReqType);
-}
-
-std::string httpRequest::getPayload(void) const {
-
-	return (this->mPayload);
-}
-
-void httpRequest::setResource(std::string defFolder, std::string errFile) {
-	
-	this->mResource = defFolder;
-	this->mResource.append(errFile);
 }
