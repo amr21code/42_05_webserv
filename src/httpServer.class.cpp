@@ -269,9 +269,10 @@ void	httpServer::answer(void)
 		if (this->mRequest->getFileExt().compare("php"))
 		{
 			/* 
+			achtung subject -> CGI rückmeldung
 			ifile close
 			übergabe von temp-generiertem dateinamen (damit parent ihn weiss)
-			fork -> execve mit request->resource
+			fork -> execve mit request->resource (PATH_INFO im subject!!)
 			execve output in file descriptor "pipen" (temp datei)
 			(achtung leaking FDs)
 			wann ist die datei fertig? -> waitpid
