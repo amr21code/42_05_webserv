@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/24 16:00:32 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 14:28:18 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,13 +115,18 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	std::vector<std::map<std::string, std::string> >::iterator itvec = config.getConfLocations().begin();
 	for (; itvec != config.getConfLocations().end(); itvec++)
 	{
-		if ((*itvec)["location"].size() > resLength && !(*itvec)["location"].compare(0, (*itvec)["location"].size(), tempResourceDir.c_str()))
+		// if ((*itvec)["location"].size() > resLength && !(*itvec)["location"].compare(0, (*itvec)["location"].size(), tempResourceDir))
+		if ((*itvec)["location"].size() > resLength && tempResourceDir.substr(0, (*itvec)["location"].size()) == (*itvec)["location"])
 		{
 			resLength = (*itvec)["location"].size();
 			locNb = i;
 		}
 		i++;
 	}
+	// std::cout << "locnb " << locNb << std::endl;
+	// std::cout << "reslen " << resLength << std::endl;
+	if (locNb == static_cast<long unsigned int>(-1))
+		throw std::logic_error("404 Not Found");
 	if (config.getConfLocations()[locNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
 		throw std::logic_error("405 Method Not Allowed");
 	this->mResource = config.getConfLocations()[locNb]["root"];
