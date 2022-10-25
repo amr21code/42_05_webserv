@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/24 15:46:21 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 16:51:03 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,13 @@ class httpRequest
 		void		setResource(std::string defFolder, std::string errFile);
 		std::string	getPayload(void) const;
 		void		firstLineHandler(std::string msg, httpConfig config);
+		std::string	getFileExt(void) const;
 
 	private:
 		std::map<std::string, std::string> mRequest;
 		std::string	mReqType;
 		std::string	mResource;
+		std::string	mFileExt;
 		bool		mDirListing;
 		std::string	mHost;
 		int			mPort;

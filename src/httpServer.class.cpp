@@ -266,6 +266,19 @@ void	httpServer::answer(void)
 			this->errorHandler(e.what());
 			return ;
 		}
+		if (this->mRequest->getFileExt().compare("php"))
+		{
+			/* 
+			ifile close
+			übergabe von temp-generiertem dateinamen (damit parent ihn weiss)
+			fork -> execve mit request->resource
+			execve output in file descriptor "pipen" (temp datei)
+			(achtung leaking FDs)
+			wann ist die datei fertig? -> waitpid
+			ifile mit temp file open
+			weiter mit getline ->	
+			*/
+		}
 		while (getline(ifile, tmp))
 		{
 			fileContent.append(tmp);
@@ -282,14 +295,14 @@ void	httpServer::answer(void)
 		{
 			if (!ifile.good())
 				throw std::logic_error("404 Not Found");
+			ifile.close();
+			remove(this->mRequest->getResource().c_str());
 		}
 		catch(const std::logic_error& e)
 		{
 			this->errorHandler(e.what());
 			return ;
 		}
-		ifile.close();
-		remove(this->mRequest->getResource().c_str());
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
 	}
@@ -342,18 +355,15 @@ void	httpServer::errorHandler(std::string error)
 		case 400:
 			this->answer("400bad_request.html");
 			break;
-
 		case 401:
 			this->answer("401unauthorized.html");
 			break;
-
 		case 402:
+			this->answer("000default.html");
 			break;
-
 		case 403:
 			this->answer("403forbidden.html");
 			break;
-
 		case 404:
 			this->answer("404not_found.html");
 			break;

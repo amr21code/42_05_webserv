@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 16:09:52 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 16:51:24 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,15 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 		// {
 		// 	std::cout << ite->first << "-" << ite->second << std::endl;
 		// }
-		
 	}
 	catch(const std::logic_error& e)
 	{
 		throw e;
 	}
-	
-	// int payloadindex = msg.find("\r\n\r\n", 0);
-	// this->mPayload = msg.substr(payloadindex + 4);
+	this->mFileExt = this->mResource.substr(this->mResource.find_last_of('.') + 1);
+	std::transform(this->mFileExt.begin(), this->mFileExt.end(), this->mFileExt.begin(), ::tolower);
+	int payloadindex = msg.find("\r\n\r\n", 0);
+	this->mPayload = msg.substr(payloadindex + 4);
 }
 
 httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
@@ -174,4 +174,9 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	}
 	else
 		throw std::logic_error("403 Forbidden");
+}
+
+std::string	httpRequest::getFileExt(void) const
+{
+	return (this->mFileExt);
 }
