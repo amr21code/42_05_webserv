@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/22 14:06:06 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 15:57:51 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ enum RequestType
 //errorChecks.cpp
 void						cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss);
 int							cfgErrorCheck(std::string configPath);
+std::vector<std::string>	explode(std::string confLine, std::string str);
 std::vector<std::string>	explode(std::string confLine, char c);
 
 

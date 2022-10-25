@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 14:28:18 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 16:09:52 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,22 +26,29 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	std::vector<std::string> tmpElements;
 	this->mDirListing = false;
 	this->mError = false;
-	tmpLines = explode(msg, '\n');
+	tmpLines = explode(msg, "\r\n");
 	std::vector<std::string>::iterator it = tmpLines.begin();
-	try // HERE IT DOES NOT READ INTO THE MAP PROPERLY
+	try
 	{
+		// std::cout << *it << std::endl;
 		firstLineHandler(*(it), config);
-		for (++it; it < tmpLines.end(); it++)
+		it++;
+		for (; it < tmpLines.end(); it++)
 		{
-			tmpElements = explode(*it, ':');
+			tmpElements = explode(*it, ": ");
 			this->mRequest[tmpElements[0]] = tmpElements[1]; 
 		}
-		std::map<std::string, std::string>::iterator ite = this->mRequest.begin();
-		for (; ite != this->mRequest.end(); ite++)
-		{
-			std::cout << ite->first << "-" << ite->second << std::endl;
-		}
-			std::cout << "FINISHED PRINTING FOR RALF" << std::endl;
+		// std::vector<std::string>::iterator itt = tmpLines.begin();
+		// for (; itt!= tmpLines.end(); itt++)
+		// {
+		// 	std::cout << "0" << *itt << std::endl;
+		// }
+		// std::map<std::string, std::string>::iterator ite = this->mRequest.begin();
+		// for (; ite != this->mRequest.end(); ite++)
+		// {
+		// 	std::cout << ite->first << "-" << ite->second << std::endl;
+		// }
+		
 	}
 	catch(const std::logic_error& e)
 	{
@@ -99,6 +106,8 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 
 	if (msg.size() > config.getMaxBodySize())
 		throw std::logic_error("413 Request Entity Too Large");
+	else if (msg.size() < 14)
+		throw std::logic_error("400 Bad Request");
 	if (msg.find("HTTP/1.1") == msg.npos)
 		throw std::logic_error("505 HTTP Version Not Supported");
 	this->mReqType = msg.substr(0, msg.find(" "));

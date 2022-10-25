@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/22 16:49:46 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 14:42:05 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,8 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 	{
 		for (std::map<std::string, std::string>::iterator it = (*itv).begin(); it != (*itv).end(); it++)
 		{
+			if (it->first == "allowed_methods" && it->second == "" )
+				it->second = this->mConfigMap["allowed_methods"];
 			if (it->second == "")
 				it->second = this->mConfigDefault[it->first];
 			if (it->first == "location" && it->second[it->second.size() - 1] != '/')
@@ -148,7 +150,7 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["port"] = "2000";
 	this->mConfigDefault["error_page"] = "./www/errors/";
 	this->mConfigDefault["client_max_body_size"] = "1000000";
-	this->mConfigDefault["allowed_methods"] = "GET,POST,DELETE";
+	this->mConfigDefault["allowed_methods"] = "GET";
 	this->mConfigDefault["CGI"] = "php,py";
 	this->mConfigDefault["root"] = "/home/pi/projects/C05_webserv/42_05_webserv/www/html/";
 	this->mConfigDefault["index"] = "index.php,index.html";

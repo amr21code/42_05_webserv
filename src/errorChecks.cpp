@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/11 14:15:37 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/19 16:48:33 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/25 16:07:42 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,23 @@ int	cfgErrorCheck(std::string configPath)
 	if (!countServers)
 		throw std::logic_error("Error: no server in config");
 	return (countServers);
+}
+
+std::vector<std::string> explode(std::string confLine, std::string str)
+{
+	std::vector<std::string> ret_vector;
+	size_t strPosLast = 0;
+	size_t strPosNext = confLine.find(str);
+	
+	while (strPosNext != std::string::npos)
+	{
+		// ret_vector.push_back(confLine.substr(strPos + 1, confLine.length() - 1));
+		ret_vector.push_back(confLine.substr(strPosLast, (strPosNext - strPosLast)));
+		strPosLast = strPosNext + str.length();
+		strPosNext = confLine.find(str, strPosLast);
+	}
+	ret_vector.push_back(confLine.substr(strPosLast));
+	return (ret_vector);
 }
 
 std::vector<std::string> explode(std::string confLine, char c)

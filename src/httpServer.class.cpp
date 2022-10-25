@@ -141,7 +141,6 @@ void	httpServer::receive(void)
 	}
 	this->mIncMsg = "";
 	// usleep(1000);
-	std::string tmp;
 	while (this->mIncMsg.size() == 0)
 	{
 		while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
@@ -150,17 +149,10 @@ void	httpServer::receive(void)
 				std::cout << "httpServer received something" << std::endl;
 			//std::cout << "i" << this->mIncMsg << std::endl;
 			//std::cout << "b" << buffer.data() << std::endl;
-	 		tmp = buffer.data();
 			if (this->mIncMsg.size() == 0)
 				this->mIncMsg = buffer.data();
-			else if (tmp.find("\r\n\r\n") == std::string::npos) // what if buffer ends in middle of \r\n\r\n ?
-				this->mIncMsg.append(tmp);
 			else
-			{
-				this->mIncMsg.append(tmp.c_str(), tmp.find("\r\n\r\n"));
-				// std::cout << tmp << std::endl;
-				break;
-			}
+				this->mIncMsg.append(buffer.data());
 			buffer.assign(this->mcConfBufSize + 1, '\0');
 			//bzero(buffer, this->mcConfBufSize);
 			// std::cout << i << " " <<  this->mIncMsg << std::endl;
@@ -174,6 +166,7 @@ void	httpServer::receive(void)
 		{
 			// std::cout << "try" << std::endl;
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
+			this->answer();
 		}
 		catch(const std::exception& e)
 		{
@@ -181,7 +174,6 @@ void	httpServer::receive(void)
 			this->errorHandler(e.what());
 		}
 		
-		this->answer();
 	}
 	// std::cout << "TEST" << std::endl;
 	else
@@ -240,7 +232,7 @@ void	httpServer::answer(void)
 	std::string		tmp;
 	std::string		fileContent;
 
-	if (!this->mRequest->getReqType().compare("PUT"))
+	if (!this->mRequest->getReqType().compare("POST"))
 	{
 		ofile.open(this->mRequest->getResource().c_str(), std::ofstream::binary);
 		std::cout << "path " << this->mRequest->getResource().c_str() << std::endl;
@@ -283,6 +275,26 @@ void	httpServer::answer(void)
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
 	}
+	else if (!this->mRequest->getReqType().compare("DELETE"))
+	{
+		ifile.open(this->mRequest->getResource().c_str());
+		try
+		{
+			if (!ifile.good())
+				throw std::logic_error("404 Not Found");
+		}
+		catch(const std::logic_error& e)
+		{
+			this->errorHandler(e.what());
+			return ;
+		}
+		ifile.close();
+		remove(this->mRequest->getResource().c_str());
+		this->generateResponse(fileContent.size());
+		this->mResponse.append(fileContent);
+	}
+	else
+		throw std::logic_error("405 Method Not Allowed");
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
 	close(this->mMsgFD);
 }
