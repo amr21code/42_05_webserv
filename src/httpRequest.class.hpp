@@ -6,17 +6,15 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 16:51:03 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/26 14:51:30 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUEST_CLASS_HPP
 #define  HTTPREQUEST_CLASS_HPP
-#include <string>
 #include "incl.hpp"
 #include "httpConfig.class.hpp"
-#include <iostream>
-#include <sstream>
+
 
 class httpRequest
 {
@@ -32,12 +30,14 @@ class httpRequest
 		std::string	getPayload(void) const;
 		void		firstLineHandler(std::string msg, httpConfig config);
 		std::string	getFileExt(void) const;
+		std::string getFileName(void) const;
 
 	private:
 		std::map<std::string, std::string> mRequest;
 		std::string	mReqType;
 		std::string	mResource;
 		std::string	mFileExt;
+		std::string mFileName;
 		bool		mDirListing;
 		std::string	mHost;
 		int			mPort;

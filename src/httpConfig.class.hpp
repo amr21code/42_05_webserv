@@ -6,20 +6,13 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/22 15:59:13 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/26 14:51:38 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPCONFIG_CLASS_HPP
 #define HTTPCONFIG_CLASS_HPP
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-#include <map>
+
 #include "incl.hpp"
 #ifndef DEBUG
 #define DEBUG 0

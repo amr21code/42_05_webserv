@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 16:51:24 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/26 14:48:55 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,10 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	tempResourceDir.erase(0, resLength);
 	this->mResource.append(tempResourceDir);
 	if (tempResourceFile.size())
+	{
 		this->mResource.append(tempResourceFile);
+		this->mFileName = tempResourceFile;
+	}
 	else if (!this->mReqType.compare("GET"))
 	{
 		if (config.getConfLocations()[locNb]["autoindex"].compare("off"))
@@ -153,6 +156,7 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 			{
 				tmpResource = this->mResource;
 				tmpResource.append(tmp[j]);
+				this->mFileName = tmp[j];
 				std::ifstream test(tmpResource.c_str());
     			if (test.good())
 				{
@@ -179,4 +183,9 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 std::string	httpRequest::getFileExt(void) const
 {
 	return (this->mFileExt);
+}
+
+std::string	httpRequest::getFileName(void) const
+{
+	return (this->mFileName);
 }

@@ -39,7 +39,7 @@ httpServer::httpServer(std::string configPath)
 }
 
 // Constructor with valid path
-httpServer::httpServer(httpConfig *config)
+httpServer::httpServer(httpConfig *config, char **env)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
@@ -48,6 +48,7 @@ httpServer::httpServer(httpConfig *config)
 	this->mSockAddr.sin_family = this->mcConfDomain;
 	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
 	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
+	this->mEnv = env;
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	try
 	{
@@ -266,13 +267,42 @@ void	httpServer::answer(void)
 			this->errorHandler(e.what());
 			return ;
 		}
-		if (this->mRequest->getFileExt().compare("php"))
+		if (!this->mRequest->getFileExt().compare("php"))
 		{
+			srand(time(NULL));
+			int	nb = rand();
+			pid_t pid = -1;
+			std::string tmpFile = this->mRequest->getFileName();
+			tmpFile.append(ft_itoa(nb));
+			ifile.close();
+			ifile.open(tmpFile.c_str());
+			pid = fork();
+			char **args = NULL;
+			// char arg1[3] = "-v";
+			// char args[2][3];
+			// args[0][0] = '-';
+			// args[0][1] = 'v';
+			// args[0][2] = 0;
+			// args[1][0] = NULL;
+			try
+			{
+				// std::cout << "test" << std::endl;
+				if (pid == -1)
+					throw std::logic_error("500 Internal Server Error");
+				if(pid == 0)
+				{
+					execve("/usr/bin/php -v", args, this->mEnv);
+					std::cout << "errno " << errno << std::endl;
+				}
+			}
+			catch(const std::logic_error& e)
+			{
+				this->errorHandler(e.what());
+			}
+			
+
 			/* 
-			achtung subject -> CGI rückmeldung
-			ifile close
-			übergabe von temp-generiertem dateinamen (damit parent ihn weiss)
-			fork -> execve mit request->resource (PATH_INFO im subject!!)
+			fork -> execve mit request->resource (PATH_INFO im subject!!) $PATH/php this->mResource
 			execve output in file descriptor "pipen" (temp datei)
 			(achtung leaking FDs)
 			wann ist die datei fertig? -> waitpid

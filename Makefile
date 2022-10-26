@@ -18,7 +18,8 @@ SRC = 	$(SRC_DIR)main.cpp \
 		$(SRC_DIR)httpServer.class.cpp \
 		$(SRC_DIR)httpConfig.class.cpp \
 		$(SRC_DIR)httpRequest.class.cpp \
-		$(SRC_DIR)errorChecks.cpp
+		$(SRC_DIR)errorChecks.cpp \
+		$(SRC_DIR)helper.cpp \
 		
 
 # takes all named source files and converts them to .o files in the /obj directory

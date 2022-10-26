@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 15:57:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/26 15:01:21 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,26 @@
 #ifndef DEBUG
 #define DEBUG 0
 #endif
-
+#include <iostream>
+#include <sstream>
 #include <vector>
+#include <string>
+#include <fstream>
+#include <algorithm>
+#include <iterator>
+#include <map>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <cstring>
+#include <cstdlib>
+#include <stdlib.h>
+
 
 enum RequestType
 {
@@ -38,6 +56,6 @@ void						cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss);
 int							cfgErrorCheck(std::string configPath);
 std::vector<std::string>	explode(std::string confLine, std::string str);
 std::vector<std::string>	explode(std::string confLine, char c);
-
+std::string 				ft_itoa(int nb);
 
 #endif

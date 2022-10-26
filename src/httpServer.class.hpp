@@ -6,25 +6,12 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 16:30:01 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/26 16:42:48 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPSERVER_CLASS_HPP
 #define HTTPSERVER_CLASS_HPP
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <cstring>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include "httpConfig.class.hpp"
 #include "httpRequest.class.hpp"
 #include "incl.hpp"
@@ -34,7 +21,7 @@ class httpServer
 	public:
 		httpServer(void);
 		httpServer(std::string configPath);
-		httpServer(httpConfig *config);
+		httpServer(httpConfig *config, char **env);
 		~httpServer(void);
 		void	openSocket(void);
 		void	closeSocket(void);
@@ -58,6 +45,7 @@ class httpServer
 		static const int	mcConfBufSize = 100;
 		std::string			mServerName; //config
 		int					mSocket;
+		char 				**mEnv;
 		// int					mPort;
 		struct sockaddr_in	mSockAddr;
 		httpConfig			*mConfig;
