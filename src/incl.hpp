@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/26 15:01:21 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/27 16:52:39 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 
 
 enum RequestType

@@ -232,6 +232,7 @@ void	httpServer::answer(void)
 	std::ofstream 	ofile;
 	std::string		tmp;
 	std::string		fileContent;
+	std::string 	tmpFile;
 
 	if (!this->mRequest->getReqType().compare("POST"))
 	{
@@ -272,27 +273,30 @@ void	httpServer::answer(void)
 			srand(time(NULL));
 			int	nb = rand();
 			pid_t pid = -1;
-			std::string tmpFile = this->mRequest->getFileName();
+			tmpFile = "/tmp/" + this->mRequest->getFileName();
 			tmpFile.append(ft_itoa(nb));
 			ifile.close();
-			ifile.open(tmpFile.c_str());
+			int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
 			pid = fork();
 			char **args = NULL;
-			// char arg1[3] = "-v";
-			// char args[2][3];
-			// args[0][0] = '-';
-			// args[0][1] = 'v';
-			// args[0][2] = 0;
-			// args[1][0] = NULL;
+			int status = 0;
+			std::string execution = this->mRequest->getResource();
 			try
 			{
-				// std::cout << "test" << std::endl;
 				if (pid == -1)
 					throw std::logic_error("500 Internal Server Error");
 				if(pid == 0)
 				{
-					execve("/usr/bin/php -v", args, this->mEnv);
-					std::cout << "errno " << errno << std::endl;
+					dup2(tempFd, STDOUT_FILENO);
+					close(tempFd);
+					execve(execution.c_str(), args, this->mEnv);
+					exit(errno);
+				}
+				else if (waitpid(-1, &status, 0))
+				{
+					if (WEXITSTATUS(status))
+						throw std::logic_error("500 Internal Server Error");
+					ifile.open(tmpFile.c_str());
 				}
 			}
 			catch(const std::logic_error& e)
@@ -302,12 +306,7 @@ void	httpServer::answer(void)
 			
 
 			/* 
-			fork -> execve mit request->resource (PATH_INFO im subject!!) $PATH/php this->mResource
-			execve output in file descriptor "pipen" (temp datei)
 			(achtung leaking FDs)
-			wann ist die datei fertig? -> waitpid
-			ifile mit temp file open
-			weiter mit getline ->	
 			*/
 		}
 		while (getline(ifile, tmp))
@@ -316,6 +315,8 @@ void	httpServer::answer(void)
 			fileContent.append("\r\n");
 		}
 		ifile.close();
+		if (tmpFile.size() > 0)
+			remove(tmpFile.c_str());
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
 	}
@@ -400,6 +401,9 @@ void	httpServer::errorHandler(std::string error)
 			break;
 		case 405:
 			this->answer("405method_not_allowed.html");
+			break;
+		case 500:
+			this->answer("500internal_server_error.html");
 			break;
 		case 505:
 			this->answer("505httpvernotsupported.html");
