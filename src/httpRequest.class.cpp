@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/28 15:12:50 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 15:30:44 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,4 +199,9 @@ std::string	httpRequest::getFileName(void) const
 std::string	httpRequest::getQuery(void) const
 {
 	return (this->mQuery);
+}
+
+bool		httpRequest::getDirListing(void) const
+{
+	return (this->mDirListing);
 }

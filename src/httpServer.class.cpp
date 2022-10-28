@@ -304,7 +304,38 @@ void	httpServer::answer(void)
 	// 	this->generateResponse(fileContent.size());
 	// 	this->mResponse.append(fileContent);
 	// }
-	if (!this->mRequest->getReqType().compare("GET") || !this->mRequest->getReqType().compare("POST"))
+	if (this->mRequest->getDirListing() && !this->mRequest->getReqType().compare("GET"))
+	{
+		ifile.open("./www/dirlisting.html");
+		while (getline(ifile, tmp))
+		{
+			fileContent.append(tmp);
+			fileContent.append("\r\n");
+		}
+		ifile.close();
+    	std::string path = this->mRequest->getResource();
+		DIR *dir;
+		struct dirent *ent;
+		std::string content;
+		if ((dir = opendir (path.c_str())) != NULL) {
+  		while ((ent = readdir (dir)) != NULL) {
+			content = "<tr><td>";
+			content.append(ent->d_name);
+			content.append("</td></tr>\r\n");
+			fileContent.append(content);
+			// fileContent.append("\r\n");
+  		}
+		fileContent.append("</table></body></html>");
+  			closedir (dir);
+		} else {
+  		/* could not open directory */
+  			perror ("error");
+		}
+
+		this->generateResponse(fileContent.size());
+		this->mResponse.append(fileContent);
+	}
+	else if (!this->mRequest->getReqType().compare("GET") || !this->mRequest->getReqType().compare("POST"))
 	{
 		ifile.open(this->mRequest->getResource().c_str());
 		try
@@ -358,7 +389,6 @@ void	httpServer::answer(void)
 				this->errorHandler(e.what());
 			}
 			
-
 			/* 
 			(achtung leaking FDs)
 			*/
@@ -512,7 +542,10 @@ char **httpServer::setEnv(std::string queryString)
 	{
 		char **envp = new char*[5]();
 		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest->getReqType()).c_str());
-		envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getQuery()).c_str());
+		if (this->mRequest->getReqType() == "POST")
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getPayload()).c_str());
+		else
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getQuery()).c_str());
 		envp[2] = strdup(("PATH_INFO=" + this->mRequest->getResource()).c_str());
 		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest->getResource()).c_str());
 		// envp[3] = strdup("CONTENT_LENGTH=7");

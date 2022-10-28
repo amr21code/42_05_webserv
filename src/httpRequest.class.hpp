@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/28 10:48:52 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 15:30:28 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class httpRequest
 		std::string	getFileExt(void) const;
 		std::string getFileName(void) const;
 		std::string getQuery(void) const;
+		bool		getDirListing(void) const;
 
 	private:
 		std::map<std::string, std::string> mRequest;
