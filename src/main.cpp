@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/26 16:42:52 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 11:36:16 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	*startServer(void *arg)
 	return (0);
 }
 
-int	main(int argc, char **argv, char **env)
+int	main(int argc, char **argv)
 {
 	if (argc !=2)
 	{
@@ -92,7 +92,7 @@ int	main(int argc, char **argv, char **env)
 			epevent.data.u64 = 0;
 			epevent.data.ptr = NULL;
 			confVector.push_back(new httpConfig(configPath, i + 1));
-			serverVector.push_back(new httpServer(confVector[i], env));
+			serverVector.push_back(new httpServer(confVector[i]));
 			serverVector[i]->listenSocket();
 			if (epoll_ctl(epfd, EPOLL_CTL_ADD, serverVector[i]->getSocket(), &epevent))
 				throw std::logic_error("Error: Failed to add file descriptor to epoll");

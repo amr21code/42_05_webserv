@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/26 16:42:48 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 14:31:58 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ class httpServer
 	public:
 		httpServer(void);
 		httpServer(std::string configPath);
-		httpServer(httpConfig *config, char **env);
+		httpServer(httpConfig *config);
 		~httpServer(void);
 		void	openSocket(void);
 		void	closeSocket(void);
@@ -36,6 +36,7 @@ class httpServer
 		void	errorHandler(std::string error);
 		void	generateResponse(size_t fileSize);
 		std::string IntToString(size_t a);
+		char 	**setEnv(std::string queryString);
 
 	private:
 		//config

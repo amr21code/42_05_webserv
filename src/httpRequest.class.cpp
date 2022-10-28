@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/26 14:48:55 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 15:12:50 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,13 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 		throw std::logic_error("505 HTTP Version Not Supported");
 	this->mReqType = msg.substr(0, msg.find(" "));
 	this->mResource = msg.substr(msg.find(" ") + 1, msg.find(" ", msg.find(" ") + 1) - msg.find(" ") - 1);
+	if (this->mResource.find('?') != std::string::npos)
+	{
+		this->mQuery = this->mResource.substr(this->mResource.find('?') + 1);
+		this->mResource.erase(this->mResource.find('?'));
+		// std::cout << "remaining resource " << this->mResource << std::endl;
+		// std::cout << "query " << this->mQuery << std::endl;
+	}
 	if (this->mResource[this->mResource.size() - 1] != '/')
 	{
 		if (this->mResource.find_last_of(".") == this->mResource.npos)
@@ -188,4 +195,8 @@ std::string	httpRequest::getFileExt(void) const
 std::string	httpRequest::getFileName(void) const
 {
 	return (this->mFileName);
+}
+std::string	httpRequest::getQuery(void) const
+{
+	return (this->mQuery);
 }

@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/27 16:52:39 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/28 14:35:04 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,5 +59,6 @@ int							cfgErrorCheck(std::string configPath);
 std::vector<std::string>	explode(std::string confLine, std::string str);
 std::vector<std::string>	explode(std::string confLine, char c);
 std::string 				ft_itoa(int nb);
+
 
 #endif

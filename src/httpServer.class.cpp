@@ -39,7 +39,7 @@ httpServer::httpServer(std::string configPath)
 }
 
 // Constructor with valid path
-httpServer::httpServer(httpConfig *config, char **env)
+httpServer::httpServer(httpConfig *config)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
@@ -48,7 +48,6 @@ httpServer::httpServer(httpConfig *config, char **env)
 	this->mSockAddr.sin_family = this->mcConfDomain;
 	this->mSockAddr.sin_port = htons(this->mConfig->getPort());
 	this->mSockAddr.sin_addr.s_addr = inet_addr(this->mConfig->getHost().c_str());
-	this->mEnv = env;
 	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
 	try
 	{
@@ -234,26 +233,78 @@ void	httpServer::answer(void)
 	std::string		fileContent;
 	std::string 	tmpFile;
 
-	if (!this->mRequest->getReqType().compare("POST"))
-	{
-		ofile.open(this->mRequest->getResource().c_str(), std::ofstream::binary);
-		std::cout << "path " << this->mRequest->getResource().c_str() << std::endl;
-		try
-		{
-			if (!ofile.is_open())
-				throw std::logic_error("4xx Permissions");
-		}
-		catch(const std::logic_error& e)
-		{
-			this->errorHandler(e.what());
-			return ;
-		}
-		// ofile << this->mRequest->getPayload();
-		ofile.write(this->mRequest->getPayload().c_str(), this->mRequest->getPayload().size());
-		ofile.close();
-		this->generateResponse(0);
-	}
-	else if (!this->mRequest->getReqType().compare("GET"))
+	// if (!this->mRequest->getReqType().compare("POST"))
+	// {
+	// 	ifile.open(this->mRequest->getResource().c_str());
+	// 	try
+	// 	{
+	// 		// if (ifs.peek() == std::ifstream::traits_type::eof())
+
+	// 		if (!ifile.good())
+	// 			throw std::logic_error("404 Not Found");
+	// 	}
+	// 	catch(const std::logic_error& e)
+	// 	{
+	// 		this->errorHandler(e.what());
+	// 		return ;
+	// 	}
+	// 	if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py"))
+	// 	{
+	// 		srand(time(NULL));
+	// 		int	nb = rand();
+	// 		pid_t pid = -1;
+	// 		tmpFile = "/tmp/" + this->mRequest->getFileName();
+	// 		tmpFile.append(ft_itoa(nb));
+	// 		ifile.close();
+	// 		int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
+	// 		pid = fork();
+	// 		int status = 0;
+	// 		std::string execution = this->mRequest->getResource();
+	// 		this->mEnv = setEnv("");
+	// 		char **args = setEnv("irgendwas"); // this->mRequest->getQuery()
+	// 		std::cout << args[0] << std::endl;
+	// 		try
+	// 		{
+	// 			if (pid == -1)
+	// 				throw std::logic_error("500 Internal Server Error");
+	// 			if(pid == 0)
+	// 			{
+	// 				dup2(tempFd, STDOUT_FILENO);
+	// 				close(tempFd);
+	// 				execve(execution.c_str(), args, this->mEnv);
+	// 				exit(errno);
+	// 			}
+	// 			else if (waitpid(-1, &status, 0))
+	// 			{
+	// 				// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
+	// 				// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
+	// 				// if (WIFEXITED(status) && WEXITSTATUS(status))
+	// 				// 	throw std::logic_error("500 Internal Server Error");
+	// 				ifile.open(tmpFile.c_str());
+	// 			}
+	// 		}
+	// 		catch(const std::logic_error& e)
+	// 		{
+	// 			this->errorHandler(e.what());
+	// 		}
+			
+
+	// 		/* 
+	// 		(achtung leaking FDs)
+	// 		*/
+	// 	}
+	// 	while (getline(ifile, tmp))
+	// 	{
+	// 		fileContent.append(tmp);
+	// 		fileContent.append("\r\n");
+	// 	}
+	// 	ifile.close();
+	// 	if (tmpFile.size() > 0)
+	// 		remove(tmpFile.c_str());
+	// 	this->generateResponse(fileContent.size());
+	// 	this->mResponse.append(fileContent);
+	// }
+	if (!this->mRequest->getReqType().compare("GET") || !this->mRequest->getReqType().compare("POST"))
 	{
 		ifile.open(this->mRequest->getResource().c_str());
 		try
@@ -268,7 +319,7 @@ void	httpServer::answer(void)
 			this->errorHandler(e.what());
 			return ;
 		}
-		if (!this->mRequest->getFileExt().compare("php"))
+		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py"))
 		{
 			srand(time(NULL));
 			int	nb = rand();
@@ -278,9 +329,9 @@ void	httpServer::answer(void)
 			ifile.close();
 			int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
 			pid = fork();
-			char **args = NULL;
 			int status = 0;
-			std::string execution = this->mRequest->getResource();
+			this->mEnv = setEnv("");
+			char **args = setEnv(this->mRequest->getFileExt()); // this->mRequest->getQuery()
 			try
 			{
 				if (pid == -1)
@@ -289,14 +340,17 @@ void	httpServer::answer(void)
 				{
 					dup2(tempFd, STDOUT_FILENO);
 					close(tempFd);
-					execve(execution.c_str(), args, this->mEnv);
+					execve(args[0], args, this->mEnv);
 					exit(errno);
 				}
 				else if (waitpid(-1, &status, 0))
 				{
-					if (WEXITSTATUS(status))
+					// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
+					// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
+					if (WIFEXITED(status) && WEXITSTATUS(status))
 						throw std::logic_error("500 Internal Server Error");
 					ifile.open(tmpFile.c_str());
+					getline(ifile, tmp);
 				}
 			}
 			catch(const std::logic_error& e)
@@ -429,4 +483,42 @@ int		httpServer::getMsgFD(void)
 int		httpServer::getSocket(void)
 {
 	return(this->mSocket);
+}
+
+char **httpServer::setEnv(std::string queryString)
+{
+	if (queryString.size() > 0)
+	{
+		std::string execution;
+		if (queryString == "php")
+			execution = "/usr/bin/php-cgi";
+		else if (queryString == "py")
+			execution = "/usr/bin/python3";
+		char **args = new char*[3];
+
+		args[0] = strdup(execution.c_str());
+		// args[1] = strdup("/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
+		args[1] = strdup(this->mRequest->getResource().c_str());
+		// args[2] = strdup("PFA=foobar");
+		// args[3] = strdup("PFA2=boofar");
+		// args[0] = strdup("REQUEST_METHOD=POST");
+		// args[1] = strdup("QUERY_STRING=PFA=foobar");
+		// args[2] = strdup("PATH_INFO=/phptest/test.php");
+		// args[3] = strdup("PATH_TRANSLATED=/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
+		args[2] = NULL;
+		return (args);
+	}
+	else
+	{
+		char **envp = new char*[5]();
+		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest->getReqType()).c_str());
+		envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getQuery()).c_str());
+		envp[2] = strdup(("PATH_INFO=" + this->mRequest->getResource()).c_str());
+		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest->getResource()).c_str());
+		// envp[3] = strdup("CONTENT_LENGTH=7");
+		envp[4] = NULL;
+		return (envp);	
+	}
+	//explode querystring '&'
+	return (NULL);
 }
