@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   incl.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 09:10:14 by raweber          ###   ########.fr       */
+/*   Updated: 2022/10/29 09:38:54 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ std::vector<std::string>	explode(std::string confLine, std::string str);
 std::vector<std::string>	explode(std::string confLine, char c);
 std::vector<std::string>	explodeOneLine(std::string confLine, std::string str);
 std::string 				ft_itoa(int nb);
-
+void						ws_single_desctruct(void *str);
+void						ws_destroy_array(char **argv);
 
 #endif

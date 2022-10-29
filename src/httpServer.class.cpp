@@ -383,6 +383,8 @@ void	httpServer::answer(void)
 				else if (waitpid(-1, &status, 0))
 				{
 					close(tempFd);
+					ws_destroy_array(args);
+					ws_destroy_array(this->mEnv);
 					// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
 					// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
 					if (WIFEXITED(status) && WEXITSTATUS(status))
@@ -432,6 +434,7 @@ void	httpServer::answer(void)
 	else
 		throw std::logic_error("405 Method Not Allowed");
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
+	delete this->mRequest;
 	close(this->mMsgFD);
 }
 
