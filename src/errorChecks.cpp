@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errorChecks.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/11 14:15:37 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 16:07:42 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 09:06:50 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,16 @@ std::vector<std::string> explode(std::string confLine, char c)
 {
 	std::vector<std::string> ret_vector;
 	size_t colonPos = confLine.find(c);
+	
+	ret_vector.push_back(confLine.substr(0, colonPos));
+	ret_vector.push_back(confLine.substr(colonPos + 1, confLine.length() - 1));
+	return (ret_vector);
+}
+
+std::vector<std::string> explodeOneLine(std::string confLine, std::string str)
+{
+	std::vector<std::string> ret_vector;
+	size_t colonPos = confLine.find(str);
 	
 	ret_vector.push_back(confLine.substr(0, colonPos));
 	ret_vector.push_back(confLine.substr(colonPos + 1, confLine.length() - 1));
