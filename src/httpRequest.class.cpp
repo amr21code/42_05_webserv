@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/28 15:30:44 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 09:08:06 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	std::vector<std::string>::iterator it = tmpLines.begin();
 	try
 	{
-		// std::cout << *it << std::endl;
 		firstLineHandler(*(it), config);
 		it++;
-		for (; it < tmpLines.end(); it++)
+		for (; it != tmpLines.end(); it++)
 		{
-			tmpElements = explode(*it, ": ");
+			tmpElements = explodeOneLine(*it, ": ");
+			// std::cout << "tmpElements[0] " << tmpElements[0] << "; tmpElements[1] " << tmpElements[1] << std::endl;
 			this->mRequest[tmpElements[0]] = tmpElements[1]; 
 		}
 		// std::vector<std::string>::iterator itt = tmpLines.begin();

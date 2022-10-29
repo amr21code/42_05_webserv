@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   incl.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 08:15:15 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 09:10:14 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ void						cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss);
 int							cfgErrorCheck(std::string configPath);
 std::vector<std::string>	explode(std::string confLine, std::string str);
 std::vector<std::string>	explode(std::string confLine, char c);
+std::vector<std::string>	explodeOneLine(std::string confLine, std::string str);
 std::string 				ft_itoa(int nb);
 
 
