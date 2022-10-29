@@ -85,13 +85,16 @@ void httpServer::openSocket(void)
 	this->mSocket = socket(this->mcConfDomain, this->mcConfComType, this->mcConfProtocol);
 	if (this->mSocket < 0)
 		throw std::logic_error("Error: cannot open socket");
-	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)) < 0)
+	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)))
+	{
+		close(this->mSocket);
 		throw std::logic_error("Error: cannot bind socket");
+	}
 }
 
 void httpServer::closeSocket(void)
 {
-    //if (DEBUG > 2)
+    if (DEBUG > 2)
 		std::cout << "httpServer closeSocket" << std::endl;
 	if (this->mSocket >= 0)
 		close(this->mSocket);
