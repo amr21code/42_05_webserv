@@ -6,12 +6,37 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/28 11:36:16 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 08:40:51 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.class.hpp"
 #include <exception>
+
+bool gShutdown = false;
+
+void	si_handler_shell(int sig)
+{
+	if (sig == SIGINT)
+	{
+		gShutdown = true;
+	}
+}
+
+void	si_init_sighandling(void)
+{
+	sigset_t			signals;
+	struct sigaction	s_action;
+
+	sigemptyset(&signals);
+	sigaddset(&signals, SIGQUIT);
+	sigaddset(&signals, SIGINT);
+	s_action.sa_mask = signals;
+	s_action.sa_flags = SA_RESTART;
+	s_action.sa_handler = &si_handler_shell;
+	sigaction(SIGINT, &s_action, NULL);
+	signal(SIGQUIT, SIG_IGN);
+}
 
 void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, int actualServers, int epfd)
 {
@@ -44,8 +69,11 @@ void	*startServer(void *arg)
 	return (0);
 }
 
+
+
 int	main(int argc, char **argv)
 {
+	si_init_sighandling();
 	if (argc !=2)
 	{
 		std::cerr << "Error: wrong number of input arguments" << std::endl;
@@ -101,18 +129,18 @@ int	main(int argc, char **argv)
 		{
 			std::cerr << e.what() << '\n';
 			destroyAllocs(confVector, serverVector, i + 1, epfd);
-			return (0);
+			return (1);
 		}
 	}
 	struct epoll_event			epevents[countServers];
 	int	event_count = 0;
-	while (1)
+	while (!gShutdown)
 	{
 		event_count = epoll_wait(epfd, epevents, 64, -1);
-		std::cout << event_count << std::endl;
+		// std::cout << event_count << std::endl;
 		try
 		{
-			if (event_count < 0)
+			if (event_count < 0 && !gShutdown)
 				throw std::logic_error("Error: epoll_wait() failed");
 		}
 		catch(const std::exception& e)

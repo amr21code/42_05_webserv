@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/28 16:08:36 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 08:15:15 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <dirent.h>
+#include <csignal>
 
 enum RequestType
 {
