@@ -197,7 +197,7 @@ void	httpServer::generateResponse(size_t fileSize)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer generateResponse" << std::endl;
-	char buf[100];
+	std::vector<char> buf(this->mcConfBufSize + 1, '\0');
 	time_t now = time(0);
 	struct tm tm = *gmtime(&now);
 	std::ifstream 	ifile;
@@ -207,18 +207,21 @@ void	httpServer::generateResponse(size_t fileSize)
 	if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
 		modTime = fileStats.st_mtim;
 	ifile.open(this->mRequest->getResource().c_str());
-	strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
+	strftime(buf.data(), this->mcConfBufSize, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	this->mResponse = "HTTP/1.1 ";
 	this->mResponse.append(this->mRespCode);
 	this->mResponse.append("\r\nDate: ");
-	this->mResponse.append(buf);
+	this->mResponse.append(buf.data());
 	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)");
 	if (fileSize > 0)
 	{
-		this->mResponse.append("\r\nLast-Modified: ");
-		bzero(buf, 100);
-		strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&modTime.tv_sec));
-		this->mResponse.append(buf);
+		if (!this->mRequest->getDirListing())
+		{
+			this->mResponse.append("\r\nLast-Modified: ");
+			buf.assign(this->mcConfBufSize + 1, '\0');
+			strftime(buf.data(), this->mcConfBufSize, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&modTime.tv_sec));
+			this->mResponse.append(buf.data());
+		}
 		this->mResponse.append("\r\nContent-Length: ");
 		this->mResponse.append(this->IntToString(fileSize));
 		this->mResponse.append("\r\nContent-Type: text/html");
