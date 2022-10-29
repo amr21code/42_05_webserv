@@ -85,13 +85,13 @@ void httpServer::openSocket(void)
 	this->mSocket = socket(this->mcConfDomain, this->mcConfComType, this->mcConfProtocol);
 	if (this->mSocket < 0)
 		throw std::logic_error("Error: cannot open socket");
-	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)))
+	if (bind(this->mSocket, (struct sockaddr *)&this->mSockAddr, sizeof(this->mSockAddr)) < 0)
 		throw std::logic_error("Error: cannot bind socket");
 }
 
 void httpServer::closeSocket(void)
 {
-    if (DEBUG > 2)
+    //if (DEBUG > 2)
 		std::cout << "httpServer closeSocket" << std::endl;
 	if (this->mSocket >= 0)
 		close(this->mSocket);
@@ -325,12 +325,12 @@ void	httpServer::answer(void)
 			fileContent.append(content);
 			// fileContent.append("\r\n");
   		}
-		fileContent.append("</table></body></html>");
   			closedir (dir);
 		} else {
   		/* could not open directory */
   			perror ("error");
 		}
+		fileContent.append("</table></body></html>");
 
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
@@ -376,6 +376,7 @@ void	httpServer::answer(void)
 				}
 				else if (waitpid(-1, &status, 0))
 				{
+					close(tempFd);
 					// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
 					// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
 					if (WIFEXITED(status) && WEXITSTATUS(status))
