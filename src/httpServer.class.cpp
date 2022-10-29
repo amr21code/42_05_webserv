@@ -334,7 +334,7 @@ void	httpServer::answer(void)
   			closedir (dir);
 		} else {
   		/* could not open directory */
-  			perror ("error");
+  			throw std::logic_error("404 Not Found");
 		}
 		fileContent.append("</table></body></html>");
 

@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 08:40:51 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 09:03:48 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ int	main(int argc, char **argv)
 	int	event_count = 0;
 	while (!gShutdown)
 	{
-		event_count = epoll_wait(epfd, epevents, 64, -1);
+		event_count = epoll_wait(epfd, epevents, 64, 1000);
 		// std::cout << event_count << std::endl;
 		try
 		{
