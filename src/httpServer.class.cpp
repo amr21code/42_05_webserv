@@ -169,7 +169,10 @@ void	httpServer::receive(void)
 		{
 			// std::cout << "try" << std::endl;
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			this->answer();
+			if (this->mRequest->getReqType() == "POST" && this->mRequest->getRequest()["Content-Type"] == "multipart/form-data; boundary=")
+				this->fileUpload();
+			else
+				this->answer();
 		}
 		catch(const std::exception& e)
 		{
@@ -183,6 +186,107 @@ void	httpServer::receive(void)
 	{
 		this->errorHandler("400bad_request.html");
 	} 
+}
+
+void	httpServer::fileUpload(void)
+{
+	std::map<std::string, std::string>	tmpRequest = this->mRequest->getRequest();
+	int			 						length = atoi(tmpRequest["Content-Length"].c_str());
+	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("="));
+	std::string							tmpPayload = this->mRequest->getPayload();
+
+	
+	// int len = 0;
+	// int num = 0;
+	// char **fields = NULL;
+	// char *env = getenv("CONTENT_TYPE");
+	// int boundary_len = 0;
+
+	// if( tec_buf_begins(env, "multipart/form-data; boundary") ){
+
+	// 	char *buffer;
+	// 	char *original_buffer;
+	// 	char *boundary = env + 30;
+	// 	boundary_len = tec_string_length(boundary);
+	// 	char *cont_len = getenv("CONTENT_LENGTH");
+	// 	int original_len = 0;
+
+	// 	if(cont_len){
+	// 		len = tec_string_to_int(cont_len);
+	// 		original_len = len;
+	// 		len += 1;
+
+	// 		buffer = (char *) malloc(sizeof(char) * len );
+	// 		fread(buffer, sizeof(char), len, stdin);
+	// 	}
+	// 	original_buffer = buffer;
+
+	// 	//first counting how many boundaries
+	// 	int next = tec_buf_find_str(buffer, len, boundary);
+
+	// 	while(next != -1){
+
+	// 		buffer += boundary_len + next;
+	// 		len -= (boundary_len + next);
+	// 		num += 1;
+	// 		next = tec_buf_find_str(buffer, len, boundary);
+	// 	}
+
+	// 	num *= 4;
+	// 	num += 1;
+	// 	len = original_len;
+	// 	int index = 0;
+	// 	fields = (char **) malloc(sizeof(char *) * num );
+	// 	memset(fields, 0, sizeof(char *) * num  );
+	// 	buffer = original_buffer;
+	// 	next = tec_buf_find_str(buffer, len, boundary);
+	// 	while(next != -1){
+	// 		buffer += next - 4;
+	// 		len -= (next - 4);
+	// 		*buffer = 0;
+	// 		buffer += boundary_len + 4;
+	// 		len -= (boundary_len + 4);
+	// 		if(tec_buf_begins(buffer, "\r\nContent-Disposition: form-data;") ){
+	// 			int n = tec_string_find_char(buffer, '\"');
+	// 			buffer += n + 1;
+	// 			len -= (n + 1);
+	// 			fields[index] = buffer;
+	// 			index += 1;
+	// 			n = tec_string_find_char(buffer, '\"');
+	// 			buffer += n;
+	// 			len -= n;
+	// 			*buffer = 0;
+	// 			buffer += 1;
+	// 			len -= 1;
+	// 			if(*buffer == ';'){
+	// 				n = tec_string_find_char(buffer, '\"');
+	// 				buffer += n + 1;
+	// 				len -= (n + 1);
+	// 				fields[index] = buffer;
+	// 				index += 1;
+	// 				n = tec_string_find_char(buffer, '\"');
+	// 				buffer += n;
+	// 				len -= n;
+	// 				*buffer = 0;
+	// 				buffer += 1;
+	// 				len -= 1;
+	// 				n = tec_string_find_str(buffer, "\r\n\r\n");
+	// 				buffer += n + 4;
+	// 				len -= (n + 4);
+	// 				fields[index] = fields[index - 2];
+	// 				index += 1;
+	// 				fields[index] = buffer;
+
+	// 			}else{
+	// 				buffer += 4;
+	// 				len -= 4;
+	// 				fields[index] = buffer;
+	// 			}
+	// 			index += 1;
+	// 		}
+	// 		next = tec_buf_find_str(buffer, len, boundary);
+	// 	}
+
 }
 
 
@@ -210,6 +314,11 @@ void	httpServer::generateResponse(size_t fileSize)
 	strftime(buf.data(), this->mcConfBufSize, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	this->mResponse = "HTTP/1.1 ";
 	this->mResponse.append(this->mRespCode);
+	if (this->mRequest->getRedirect())
+	{
+		this->mResponse.append("\r\nLocation: ");
+		this->mResponse.append(this->mRequest->getResource());
+	}
 	this->mResponse.append("\r\nDate: ");
 	this->mResponse.append(buf.data());
 	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)");
@@ -310,7 +419,12 @@ void	httpServer::answer(void)
 	// 	this->generateResponse(fileContent.size());
 	// 	this->mResponse.append(fileContent);
 	// }
-	if (this->mRequest->getDirListing() && !this->mRequest->getReqType().compare("GET"))
+	if (this->mRequest->getRedirect())
+	{
+		this->mRespCode = "301 Moved Permanently";
+		this->generateResponse(0);
+	}
+	else if (this->mRequest->getDirListing() && !this->mRequest->getReqType().compare("GET"))
 	{
 		ifile.open("./www/dirlisting.html");
 		while (getline(ifile, tmp))
@@ -356,7 +470,7 @@ void	httpServer::answer(void)
 			this->errorHandler(e.what());
 			return ;
 		}
-		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py"))
+		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py") || !this->mRequest->getFileExt().compare("pl"))
 		{
 			srand(time(NULL));
 			int	nb = rand();
@@ -534,6 +648,8 @@ char **httpServer::setEnv(std::string queryString)
 			execution = "/usr/bin/php-cgi";
 		else if (queryString == "py")
 			execution = "/usr/bin/python3";
+		else if (queryString == "pl")
+			execution = "/usr/bin/perl";
 		char **args = new char*[3];
 
 		args[0] = strdup(execution.c_str());
@@ -564,4 +680,9 @@ char **httpServer::setEnv(std::string queryString)
 	}
 	//explode querystring '&'
 	return (NULL);
+}
+
+std::map<std::string, std::string> httpRequest::getRequest() const
+{
+	return(this->mRequest);
 }

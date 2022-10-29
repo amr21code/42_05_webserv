@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/25 14:42:05 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/29 14:58:07 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["autoindex"] = "1";
 	this->mConfigDefault["location"] = "/";
 	this->mConfigDefault["dirlisting"] = "0";
-	this->mConfigDefault["redirect"] = "return 301 index.html https://www.google.com/";
+	this->mConfigDefault["redirect"] = "";
 }
 
 std::string httpConfig::getServerNames(void)

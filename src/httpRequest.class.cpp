@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 09:08:06 by raweber          ###   ########.fr       */
+/*   Updated: 2022/10/29 17:22:21 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,12 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	std::vector<std::string> tmpLines;
 	std::vector<std::string> tmpElements;
 	this->mDirListing = false;
+	this->mRedirect = false;
 	this->mError = false;
 	tmpLines = explode(msg, "\r\n");
+	// std::cout << "!!!!!!!!!!!!!!!ralf begin" << std::endl;
+	// std::cout << msg << std::endl;
+	// std::cout << "!!!!!!!!!!!!!!!ralf end" << std::endl;
 	std::vector<std::string>::iterator it = tmpLines.begin();
 	try
 	{
@@ -146,6 +150,12 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	if (config.getConfLocations()[locNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
 		throw std::logic_error("405 Method Not Allowed");
 	this->mResource = config.getConfLocations()[locNb]["root"];
+	if (config.getConfLocations()[locNb]["redirect"].size() > 0)
+	{
+		this->mResource = config.getConfLocations()[locNb]["redirect"];
+		this->mRedirect = true;
+		return ;
+	}
 	tempResourceDir.erase(0, resLength);
 	this->mResource.append(tempResourceDir);
 	if (tempResourceFile.size())
@@ -157,7 +167,7 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	{
 		if (config.getConfLocations()[locNb]["autoindex"].compare("off"))
 		{
-			std::vector<std::string> tmp = explode(config.getConfLocations()[locNb]["index"], ',');
+			std::vector<std::string> tmp = explode(config.getConfLocations()[locNb]["index"], ",");
 			std::string	tmpResource;
 			for (size_t j = 0; j < tmp.size(); j++)
 			{
@@ -204,4 +214,9 @@ std::string	httpRequest::getQuery(void) const
 bool		httpRequest::getDirListing(void) const
 {
 	return (this->mDirListing);
+}
+
+bool		httpRequest::getRedirect(void) const
+{
+	return (this->mRedirect);
 }
