@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 17:31:59 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/30 17:12:20 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class httpServer
 		void	generateResponse(size_t fileSize);
 		std::string IntToString(size_t a);
 		char 	**setEnv(std::string queryString);
-		void	httpServer::fileUpload(void);
+		void	fileUpload(void);
 
 	private:
 		//config

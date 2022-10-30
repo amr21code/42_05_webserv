@@ -169,7 +169,9 @@ void	httpServer::receive(void)
 		{
 			// std::cout << "try" << std::endl;
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			if (this->mRequest->getReqType() == "POST" && this->mRequest->getRequest()["Content-Type"] == "multipart/form-data; boundary=")
+			// std::cout << "req " << this->mRequest->getReqType() << std::endl;
+			// std::cout << "cont -" << this->mRequest->getRequest()["Content-Type"] << std::endl;
+			if (!this->mRequest->getReqType().compare("POST") && !this->mRequest->getRequest()["Content-Type"].find_first_of(" multipart/form-data; boundary="))
 				this->fileUpload();
 			else
 				this->answer();
@@ -192,10 +194,23 @@ void	httpServer::fileUpload(void)
 {
 	std::map<std::string, std::string>	tmpRequest = this->mRequest->getRequest();
 	int			 						length = atoi(tmpRequest["Content-Length"].c_str());
-	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("="));
+	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("=")+1);
 	std::string							tmpPayload = this->mRequest->getPayload();
+	size_t								payloadPos = 0;
+	int									nbChunks = -1;
 
-	
+	std::cout << "len " << length << std::endl;
+	std::cout << "bound " << boundary << std::endl;
+	std::cout << "pay " << tmpPayload << std::endl;
+
+	while (payloadPos != std::string::npos)
+	{
+		payloadPos = tmpPayload.find(boundary, payloadPos + boundary.size());
+		nbChunks++;
+	}
+
+	std::cout << "Chunks " << nbChunks << std::endl;
+
 	// int len = 0;
 	// int num = 0;
 	// char **fields = NULL;

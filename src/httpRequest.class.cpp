@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 17:22:21 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/30 17:25:53 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,11 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 		it++;
 		for (; it != tmpLines.end(); it++)
 		{
+			if (!(*it).compare(0, 29, "-----------------------------"))
+				break;
 			tmpElements = explodeOneLine(*it, ": ");
 			// std::cout << "tmpElements[0] " << tmpElements[0] << "; tmpElements[1] " << tmpElements[1] << std::endl;
-			this->mRequest[tmpElements[0]] = tmpElements[1]; 
+			this->mRequest[tmpElements[0]] = tmpElements[1];
 		}
 		// std::vector<std::string>::iterator itt = tmpLines.begin();
 		// for (; itt!= tmpLines.end(); itt++)
