@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpServer.class.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/30 17:12:20 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 14:23:40 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,10 @@
 class httpServer
 {
 	public:
-		httpServer(void);
-		httpServer(std::string configPath);
 		httpServer(httpConfig *config);
 		~httpServer(void);
 		void	openSocket(void);
 		void	closeSocket(void);
-		void	log(std::string &message) const;
 		void	listenSocket(void);
 		void	announce(void) const;
 		int		getMsgFD(void);

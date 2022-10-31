@@ -13,36 +13,12 @@
 #include "httpServer.class.hpp"
 #include "httpConfig.class.hpp"
 
-// Default constructor
-httpServer::httpServer(void)
-{
-	if (DEBUG > 2)
-		std::cout << "httpServer default constructor" << std::endl;
-	// readConfig();
-	this->mSockAddr.sin_family = this->mcConfDomain;
-	this->mSockAddr.sin_port = htons(2000);
-	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
-	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
-	this->openSocket();
-	this->listenSocket();
-} // CHECK THAT THIS WONT FAIL US!
-
-// Constructor with valid path
-httpServer::httpServer(std::string configPath)
-{
-	if (DEBUG > 2)
-		std::cout << "httpServer constructor with path" << configPath << std::endl;
-	this->mSockAddr.sin_family = this->mcConfDomain;
-	this->mSockAddr.sin_addr.s_addr = INADDR_ANY;
-	memset(this->mSockAddr.sin_zero, '\0', sizeof this->mSockAddr.sin_zero);
-	this->openSocket();
-}
-
 // Constructor with valid path
 httpServer::httpServer(httpConfig *config)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
+
 	this->mConfig = config;
 	this->mRespCode = "200 OK";
 	this->mSockAddr.sin_family = this->mcConfDomain;
@@ -57,24 +33,13 @@ httpServer::httpServer(httpConfig *config)
 	{
 		throw e;
 	}
-	// std::vector<std::map<std::string, std::string> > temp = config->getConfLocations();
-	// std::vector<std::map<std::string, std::string> >::iterator it = temp.begin();
-	// std::map<std::string, std::string>::iterator ite = it->begin();
-	// for (; it != temp.end(); it++)
-	// {
-	// 	std::cout << "--- new ---" << std::endl;
-	// 	for (ite = it->begin(); ite != it->end() ; ite++)
-	// 	{
-	// 		std::cout << ite->first << " -> " << ite->second << std::endl;
-	// 	}
-	// }
-
 }
 
 httpServer::~httpServer(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer destructor" << std::endl;
+
 	this->closeSocket();
 }
 
@@ -82,6 +47,7 @@ void httpServer::openSocket(void)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer openSocket" << std::endl;
+
 	this->mSocket = socket(this->mcConfDomain, this->mcConfComType, this->mcConfProtocol);
 	if (this->mSocket < 0)
 		throw std::logic_error("Error: cannot open socket");
@@ -96,24 +62,15 @@ void httpServer::closeSocket(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer closeSocket" << std::endl;
+
 	if (this->mSocket >= 0)
 		close(this->mSocket);
-}
-
-void httpServer::log(std::string &message) const
-{
-    if (DEBUG > 2)
-		std::cout << "httpServer log" << std::endl;
-    std::cout << message << std::endl;
 }
 
 void	httpServer::listenSocket(void)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer listenSocket()" << std::endl;
-	// int		addrlen = sizeof(this->mSockAddr);
-	// char	buffer[this->mcConfBufSize];
-	// int		recv_return = 1;
 
 	if (listen(this->mSocket, 30000))
 	{
@@ -121,20 +78,16 @@ void	httpServer::listenSocket(void)
 		return ;
 	}
 	this->announce();
-	// while (1)
-	// {
-  		// bzero(buffer, this->mcConfBufSize);
-
-  	// }
 }
 
 void	httpServer::receive(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer receive" << std::endl;
-	int		addrlen = sizeof(this->mSockAddr);
-	std::vector<char> buffer(mcConfBufSize + 1, '\0');
-	int		recv_return = 1;
+
+	int					addrlen = sizeof(this->mSockAddr);
+	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
+	int					recv_return = 1;
 
 	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
 	if (this->mMsgFD < 0)
@@ -143,34 +96,24 @@ void	httpServer::receive(void)
 		return ;
 	}
 	this->mIncMsg = "";
-	// usleep(1000);
 	while (this->mIncMsg.size() == 0)
 	{
 		while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 		{
 			if (DEBUG > 2)
 				std::cout << "httpServer received something" << std::endl;
-			//std::cout << "i" << this->mIncMsg << std::endl;
-			//std::cout << "b" << buffer.data() << std::endl;
 			if (this->mIncMsg.size() == 0)
 				this->mIncMsg = buffer.data();
 			else
 				this->mIncMsg.append(buffer.data());
 			buffer.assign(this->mcConfBufSize + 1, '\0');
-			//bzero(buffer, this->mcConfBufSize);
-			// std::cout << i << " " <<  this->mIncMsg << std::endl;
-			// i++;
-			// std::cout << "test" << std::endl;
 		}
 	}
 	if (this->mIncMsg.size() > 0)
 	{
 		try
 		{
-			// std::cout << "try" << std::endl;
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			// std::cout << "req " << this->mRequest->getReqType() << std::endl;
-			// std::cout << "cont -" << this->mRequest->getRequest()["Content-Type"] << std::endl;
 			if (!this->mRequest->getReqType().compare("POST") && !this->mRequest->getRequest()["Content-Type"].find_first_of(" multipart/form-data; boundary="))
 				this->fileUpload();
 			else
@@ -178,12 +121,10 @@ void	httpServer::receive(void)
 		}
 		catch(const std::exception& e)
 		{
-			// std::cerr << e.what() << '\n';
 			this->errorHandler(e.what());
 		}
 		
 	}
-	// std::cout << "TEST" << std::endl;
 	else
 	{
 		this->errorHandler("400bad_request.html");
@@ -368,13 +309,14 @@ void	httpServer::generateResponse(size_t fileSize)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer generateResponse" << std::endl;
-	std::vector<char> buf(this->mcConfBufSize + 1, '\0');
-	time_t now = time(0);
-	struct tm tm = *gmtime(&now);
-	std::ifstream 	ifile;
-	struct stat fileStats;
-	timespec	modTime;
-	// if (stat("test.html", &fileStats) == 0)
+
+	std::vector<char>	buf(this->mcConfBufSize + 1, '\0');
+	time_t				now = time(0);
+	struct tm			tm = *gmtime(&now);
+	std::ifstream 		ifile;
+	struct stat			fileStats;
+	timespec			modTime;
+
 	if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
 		modTime = fileStats.st_mtim;
 	ifile.open(this->mRequest->getResource().c_str());
@@ -409,83 +351,13 @@ void	httpServer::answer(void)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer answer" << std::endl;
+
 	std::ifstream 	ifile;
 	std::ofstream 	ofile;
 	std::string		tmp;
 	std::string		fileContent;
 	std::string 	tmpFile;
 
-	// if (!this->mRequest->getReqType().compare("POST"))
-	// {
-	// 	ifile.open(this->mRequest->getResource().c_str());
-	// 	try
-	// 	{
-	// 		// if (ifs.peek() == std::ifstream::traits_type::eof())
-
-	// 		if (!ifile.good())
-	// 			throw std::logic_error("404 Not Found");
-	// 	}
-	// 	catch(const std::logic_error& e)
-	// 	{
-	// 		this->errorHandler(e.what());
-	// 		return ;
-	// 	}
-	// 	if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py"))
-	// 	{
-	// 		srand(time(NULL));
-	// 		int	nb = rand();
-	// 		pid_t pid = -1;
-	// 		tmpFile = "/tmp/" + this->mRequest->getFileName();
-	// 		tmpFile.append(ft_itoa(nb));
-	// 		ifile.close();
-	// 		int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
-	// 		pid = fork();
-	// 		int status = 0;
-	// 		std::string execution = this->mRequest->getResource();
-	// 		this->mEnv = setEnv("");
-	// 		char **args = setEnv("irgendwas"); // this->mRequest->getQuery()
-	// 		std::cout << args[0] << std::endl;
-	// 		try
-	// 		{
-	// 			if (pid == -1)
-	// 				throw std::logic_error("500 Internal Server Error");
-	// 			if(pid == 0)
-	// 			{
-	// 				dup2(tempFd, STDOUT_FILENO);
-	// 				close(tempFd);
-	// 				execve(execution.c_str(), args, this->mEnv);
-	// 				exit(errno);
-	// 			}
-	// 			else if (waitpid(-1, &status, 0))
-	// 			{
-	// 				// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
-	// 				// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
-	// 				// if (WIFEXITED(status) && WEXITSTATUS(status))
-	// 				// 	throw std::logic_error("500 Internal Server Error");
-	// 				ifile.open(tmpFile.c_str());
-	// 			}
-	// 		}
-	// 		catch(const std::logic_error& e)
-	// 		{
-	// 			this->errorHandler(e.what());
-	// 		}
-			
-
-	// 		/* 
-	// 		(achtung leaking FDs)
-	// 		*/
-	// 	}
-	// 	while (getline(ifile, tmp))
-	// 	{
-	// 		fileContent.append(tmp);
-	// 		fileContent.append("\r\n");
-	// 	}
-	// 	ifile.close();
-	// 	if (tmpFile.size() > 0)
-	// 		remove(tmpFile.c_str());
-	// 	this->generateResponse(fileContent.size());
-	// 	this->mResponse.append(fileContent);
-	// }
 	if (this->mRequest->getRedirect())
 	{
 		this->mRespCode = "301 Moved Permanently";
@@ -510,11 +382,10 @@ void	httpServer::answer(void)
 			content.append(ent->d_name);
 			content.append("</td></tr>\r\n");
 			fileContent.append(content);
-			// fileContent.append("\r\n");
   		}
-  			closedir (dir);
+  		closedir (dir);
 		} else {
-  		/* could not open directory */
+  			/* could not open directory */
   			throw std::logic_error("404 Not Found");
 		}
 		fileContent.append("</table></body></html>");
