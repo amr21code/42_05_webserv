@@ -105,8 +105,9 @@ void	httpServer::receive(void)
 			if (this->mIncMsg.size() == 0)
 				this->mIncMsg = buffer.data();
 			else
-				this->mIncMsg.append(buffer.data());
+				this->mIncMsg.append(buffer.data(), recv_return); 
 			buffer.assign(this->mcConfBufSize + 1, '\0');
+			usleep(100);
 		}
 	}
 	if (this->mIncMsg.size() > 0)
@@ -114,7 +115,7 @@ void	httpServer::receive(void)
 		try
 		{
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			if (!this->mRequest->getReqType().compare("POST") && !this->mRequest->getRequest()["Content-Type"].find_first_of(" multipart/form-data; boundary="))
+			if (!this->mRequest->getReqType().compare("POST") && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
 				this->fileUpload();
 			else
 				this->answer();
@@ -134,7 +135,7 @@ void	httpServer::receive(void)
 void	httpServer::fileUpload(void)
 {
 	std::map<std::string, std::string>	tmpRequest = this->mRequest->getRequest();
-	int			 						length = atoi(tmpRequest["Content-Length"].c_str());
+	size_t		 						length = atoi(tmpRequest["Content-Length"].c_str());
 	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("=")+1);
 	std::string							tmpPayload = this->mRequest->getPayload();
 	size_t								payloadPos = 0;
@@ -145,9 +146,8 @@ void	httpServer::fileUpload(void)
 	std::fstream						file;
 	std::string							path;
 	
-	std::cout << "len " << length << std::endl;
-	std::cout << "bound " << boundary << std::endl;
-	std::cout << "pay " << tmpPayload << std::endl;
+	// std::cout << "bound " << boundary << std::endl;
+	// std::cout << "pay " << tmpPayload << std::endl;
 
 	while (payloadPos != std::string::npos)
 	{
@@ -155,7 +155,7 @@ void	httpServer::fileUpload(void)
 		nbChunks++;
 	}
 
-	std::cout << "Chunks " << nbChunks << std::endl;
+	// std::cout << "Chunks " << nbChunks << std::endl;
 	payloadPos = tmpPayload.find(boundary);
 	while (nbChunks >= 0)
 	{
@@ -188,20 +188,27 @@ void	httpServer::fileUpload(void)
 				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
 				content = tmpPayload.substr(payloadPos, tmpPayload.find(boundary, payloadPos) - payloadPos - 2);
 				// std::cout << "RALF" << content << "RALF" << std::endl;
-				file << content.c_str();
+				file.write(&content[0], content.size());
 				file.close();
 			}
 			else
 				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
 		}
-		else if (tmpPayload.find("--") == payloadPos)
-		{
-			std::cout << "transmission end" << std::endl;
-			break ;
-		}
+		// else if (tmpPayload.find("--") == payloadPos)
+		// {
+		// 	// std::cout << "transmission end" << std::endl;
+		// 	break ;
+		// }
 		payloadPos = tmpPayload.find(boundary, payloadPos);
 		// std::cout << "payload " << std::endl;
 		nbChunks--;
+		// std::cout << "contlen " << length << std::endl;
+		// std::cout << "lenpayl " << tmpPayload.size() << std::endl;
+		// std::cout << "maxlen " << tmpPayload.max_size() << std::endl;
+		if (length == tmpPayload.size())
+			throw std::logic_error("201 Created");
+		else
+			throw std::logic_error("500 Internal Server Error");
 	}
 
 	// int len = 0;
@@ -468,6 +475,9 @@ void	httpServer::errorHandler(std::string error)
 	this->mRespCode = error;
 	switch (errorNo)
 	{
+		case 201:
+			this->answer("201created.html");
+			break;
 		case 400:
 			this->answer("400bad_request.html");
 			break;
