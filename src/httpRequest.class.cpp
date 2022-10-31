@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/30 17:25:53 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 09:44:52 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,9 +107,9 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	std::string	tempResourceDir = "/";
 	std::string	tempResourceFile;
 	size_t		resLength = 0;
-	size_t		locNb = -1;
 	size_t		i = 0;
 
+	this->mLocNb = -1;
 	if (msg.size() > config.getMaxBodySize())
 		throw std::logic_error("413 Request Entity Too Large");
 	else if (msg.size() < 14)
@@ -141,20 +141,20 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 		if ((*itvec)["location"].size() > resLength && tempResourceDir.substr(0, (*itvec)["location"].size()) == (*itvec)["location"])
 		{
 			resLength = (*itvec)["location"].size();
-			locNb = i;
+			this->mLocNb = i;
 		}
 		i++;
 	}
-	// std::cout << "locnb " << locNb << std::endl;
+	// std::cout << "this->mLocNb " << this->mLocNb << std::endl;
 	// std::cout << "reslen " << resLength << std::endl;
-	if (locNb == static_cast<long unsigned int>(-1))
+	if (this->mLocNb == static_cast<long unsigned int>(-1))
 		throw std::logic_error("404 Not Found");
-	if (config.getConfLocations()[locNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
+	if (config.getConfLocations()[this->mLocNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
 		throw std::logic_error("405 Method Not Allowed");
-	this->mResource = config.getConfLocations()[locNb]["root"];
-	if (config.getConfLocations()[locNb]["redirect"].size() > 0)
+	this->mResource = config.getConfLocations()[this->mLocNb]["root"];
+	if (config.getConfLocations()[this->mLocNb]["redirect"].size() > 0)
 	{
-		this->mResource = config.getConfLocations()[locNb]["redirect"];
+		this->mResource = config.getConfLocations()[this->mLocNb]["redirect"];
 		this->mRedirect = true;
 		return ;
 	}
@@ -167,9 +167,9 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 	}
 	else if (!this->mReqType.compare("GET"))
 	{
-		if (config.getConfLocations()[locNb]["autoindex"].compare("off"))
+		if (config.getConfLocations()[this->mLocNb]["autoindex"].compare("off"))
 		{
-			std::vector<std::string> tmp = explode(config.getConfLocations()[locNb]["index"], ",");
+			std::vector<std::string> tmp = explode(config.getConfLocations()[this->mLocNb]["index"], ",");
 			std::string	tmpResource;
 			for (size_t j = 0; j < tmp.size(); j++)
 			{
@@ -186,7 +186,7 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 				test.close();
 			}
 		}
-		if (this->mResource[this->mResource.size() - 1] == '/' && !config.getConfLocations()[locNb]["dirlisting"].compare("on"))
+		if (this->mResource[this->mResource.size() - 1] == '/' && !config.getConfLocations()[this->mLocNb]["dirlisting"].compare("on"))
 		{
 			this->mDirListing = true;
 		}
@@ -221,4 +221,9 @@ bool		httpRequest::getDirListing(void) const
 bool		httpRequest::getRedirect(void) const
 {
 	return (this->mRedirect);
+}
+
+size_t		httpRequest::getLocNb(void) const
+{
+	return (this->mLocNb);
 }

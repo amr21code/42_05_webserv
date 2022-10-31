@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 14:58:07 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 09:33:30 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,7 @@ void	httpConfig::mInitHttpConf(void)
 	this->mStdLocation["location"] = "";
 	this->mStdLocation["allowed_methods"] = "";
 	this->mStdLocation["dirlisting"] = "";
+	this->mStdLocation["upload"] = "";
 	this->mConfLocations.push_back(this->mStdLocation);
 	
 	this->mConfigDefault["server_names"] = "webserv";
@@ -158,6 +159,7 @@ void	httpConfig::mInitHttpConf(void)
 	this->mConfigDefault["location"] = "/";
 	this->mConfigDefault["dirlisting"] = "0";
 	this->mConfigDefault["redirect"] = "";
+	this->mConfigDefault["upload"] = "";
 }
 
 std::string httpConfig::getServerNames(void)

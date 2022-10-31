@@ -198,7 +198,12 @@ void	httpServer::fileUpload(void)
 	std::string							tmpPayload = this->mRequest->getPayload();
 	size_t								payloadPos = 0;
 	int									nbChunks = -1;
-
+	size_t								lineEnd = 0;
+	std::string							fileName;
+	std::string							content;
+	std::fstream						file;
+	std::string							path;
+	
 	std::cout << "len " << length << std::endl;
 	std::cout << "bound " << boundary << std::endl;
 	std::cout << "pay " << tmpPayload << std::endl;
@@ -210,6 +215,53 @@ void	httpServer::fileUpload(void)
 	}
 
 	std::cout << "Chunks " << nbChunks << std::endl;
+	payloadPos = tmpPayload.find(boundary);
+	while (nbChunks >= 0)
+	{
+		/*
+		finde erste boundary -> suchindex hinter boundary
+		finde content disposition an pos 0 und finde filename="
+		speichere filename ab (optional bis dahin kein \r\n)
+		suchindex hinter \r\n\r\n
+		finde nächste boundary und substr von suchindex bis boundary - 1
+		wenn letzte boundary nicht auf -- endet -> error
+		*/
+		// std::cout << "find bound true" << std::endl;
+		payloadPos = payloadPos + boundary.size() + 2;
+		if (tmpPayload.find("Content-Disposition") == payloadPos)
+		{
+			lineEnd = tmpPayload.find("\r\n", payloadPos);
+			// std::cout << "ppos " << tmpPayload.find("filename=", payloadPos) << std::endl;
+			if ((payloadPos = tmpPayload.find("filename=", payloadPos)) < lineEnd)
+			{
+				fileName = tmpPayload.substr(payloadPos + 10, tmpPayload.find("\"", payloadPos + 10) - payloadPos - 10);
+
+				// std::cout << "filename " << fileName << std::endl;
+				// std::cout << "payload pos " << payloadPos << std::endl;
+				// std::cout << "line end " << lineEnd << std::endl;
+				std::cout << this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["upload"] << std::endl;
+				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["upload"])).append(fileName);
+				file.open(path.c_str(), std::fstream::out | std::fstream::trunc);
+				if (!file.good())
+					throw std::logic_error("404 Not Found");
+				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
+				content = tmpPayload.substr(payloadPos, tmpPayload.find(boundary, payloadPos) - payloadPos - 2);
+				// std::cout << "RALF" << content << "RALF" << std::endl;
+				file << content.c_str();
+				file.close();
+			}
+			else
+				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
+		}
+		else if (tmpPayload.find("--") == payloadPos)
+		{
+			std::cout << "transmission end" << std::endl;
+			break ;
+		}
+		payloadPos = tmpPayload.find(boundary, payloadPos);
+		// std::cout << "payload " << std::endl;
+		nbChunks--;
+	}
 
 	// int len = 0;
 	// int num = 0;

@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 17:31:04 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 09:45:00 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class httpRequest
 		std::string getQuery(void) const;
 		bool		getDirListing(void) const;
 		bool		getRedirect(void) const;
+		size_t		getLocNb(void) const;
 		std::map<std::string, std::string> getRequest() const;
 
 	private:
@@ -49,6 +50,7 @@ class httpRequest
 		bool		mDirListing;
 		bool		mRedirect;
 		bool		mError;
+		size_t		mLocNb;
 		
 		// add stuff for POST/DELETE
 };
