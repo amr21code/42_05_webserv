@@ -6,7 +6,7 @@
 /*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 14:23:40 by raweber          ###   ########.fr       */
+/*   Updated: 2022/10/31 14:36:07 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class httpServer
 		std::string IntToString(size_t a);
 		char 	**setEnv(std::string queryString);
 		void	fileUpload(void);
+		void	handleDirListing(void);
+
 
 	private:
 		//config

@@ -365,33 +365,13 @@ void	httpServer::answer(void)
 	}
 	else if (this->mRequest->getDirListing() && !this->mRequest->getReqType().compare("GET"))
 	{
-		ifile.open("./www/dirlisting.html");
-		while (getline(ifile, tmp))
+		try {
+			handleDirListing();
+		}
+		catch(const std::logic_error &e)
 		{
-			fileContent.append(tmp);
-			fileContent.append("\r\n");
+			throw e;
 		}
-		ifile.close();
-    	std::string path = this->mRequest->getResource();
-		DIR *dir;
-		struct dirent *ent;
-		std::string content;
-		if ((dir = opendir (path.c_str())) != NULL) {
-  		while ((ent = readdir (dir)) != NULL) {
-			content = "<tr><td>";
-			content.append(ent->d_name);
-			content.append("</td></tr>\r\n");
-			fileContent.append(content);
-  		}
-  		closedir (dir);
-		} else {
-  			/* could not open directory */
-  			throw std::logic_error("404 Not Found");
-		}
-		fileContent.append("</table></body></html>");
-
-		this->generateResponse(fileContent.size());
-		this->mResponse.append(fileContent);
 	}
 	else if (!this->mRequest->getReqType().compare("GET") || !this->mRequest->getReqType().compare("POST"))
 	{
@@ -620,7 +600,39 @@ char **httpServer::setEnv(std::string queryString)
 	return (NULL);
 }
 
-std::map<std::string, std::string> httpRequest::getRequest() const
+void httpServer::handleDirListing(void)
 {
-	return(this->mRequest);
+	std::ifstream 	ifile;
+	std::ofstream 	ofile;
+	std::string		tmp;
+	std::string		fileContent;
+	std::string 	tmpFile;
+
+	ifile.open("./www/dirlisting.html");
+	while (getline(ifile, tmp))
+	{
+		fileContent.append(tmp);
+		fileContent.append("\r\n");
+	}
+	ifile.close();
+	std::string path = this->mRequest->getResource();
+	DIR *dir;
+	struct dirent *ent;
+	std::string content;
+	if ((dir = opendir (path.c_str())) != NULL) {
+	while ((ent = readdir (dir)) != NULL) {
+		content = "<tr><td>";
+		content.append(ent->d_name);
+		content.append("</td></tr>\r\n");
+		fileContent.append(content);
+	}
+	closedir (dir);
+	} else {
+		/* could not open directory */
+		throw std::logic_error("404 Not Found");
+	}
+	fileContent.append("</table></body></html>");
+
+	this->generateResponse(fileContent.size());
+	this->mResponse.append(fileContent);
 }

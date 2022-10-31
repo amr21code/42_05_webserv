@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 09:44:52 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 14:37:28 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,11 @@ httpRequest::~httpRequest(void)
 {
 	if (DEBUG > 2)
         std::cout << "httpRequest destructor" << std::endl;
+}
+
+std::map<std::string, std::string> httpRequest::getRequest() const
+{
+	return(this->mRequest);
 }
 
 std::string httpRequest::getResource(void) const {

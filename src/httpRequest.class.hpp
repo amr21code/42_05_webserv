@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 09:45:00 by anruland         ###   ########.fr       */
+/*   Updated: 2022/10/31 14:38:00 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
