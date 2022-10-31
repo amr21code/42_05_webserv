@@ -6,7 +6,7 @@
 /*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 14:36:07 by raweber          ###   ########.fr       */
+/*   Updated: 2022/10/31 14:57:39 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,21 +21,23 @@ class httpServer
 	public:
 		httpServer(httpConfig *config);
 		~httpServer(void);
-		void	openSocket(void);
-		void	closeSocket(void);
-		void	listenSocket(void);
-		void	announce(void) const;
-		int		getMsgFD(void);
-		int		getSocket(void);
-		void	receive(void);
-		void	answer(void);
-		void	answer(std::string file);
-		void	errorHandler(std::string error);
-		void	generateResponse(size_t fileSize);
-		std::string IntToString(size_t a);
-		char 	**setEnv(std::string queryString);
-		void	fileUpload(void);
-		void	handleDirListing(void);
+		void			openSocket(void);
+		void			closeSocket(void);
+		void			listenSocket(void);
+		void			announce(void) const;
+		int				getMsgFD(void);
+		int				getSocket(void);
+		void			receive(void);
+		void			answer(void);
+		void			answer(std::string file);
+		void			errorHandler(std::string error);
+		void			generateResponse(size_t fileSize);
+		std::string 	IntToString(size_t a);
+		char 			**setEnv(std::string queryString);
+		void			fileUpload(void);
+		void			handleDirListing(void);
+		std::string		handleCGI(void);
+
 
 
 	private:

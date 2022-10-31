@@ -353,7 +353,6 @@ void	httpServer::answer(void)
 		std::cout << "httpServer answer" << std::endl;
 
 	std::ifstream 	ifile;
-	std::ofstream 	ofile;
 	std::string		tmp;
 	std::string		fileContent;
 	std::string 	tmpFile;
@@ -378,8 +377,6 @@ void	httpServer::answer(void)
 		ifile.open(this->mRequest->getResource().c_str());
 		try
 		{
-			// if (ifs.peek() == std::ifstream::traits_type::eof())
-
 			if (!ifile.good())
 				throw std::logic_error("404 Not Found");
 		}
@@ -390,49 +387,10 @@ void	httpServer::answer(void)
 		}
 		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py") || !this->mRequest->getFileExt().compare("pl"))
 		{
-			srand(time(NULL));
-			int	nb = rand();
-			pid_t pid = -1;
-			tmpFile = "/tmp/" + this->mRequest->getFileName();
-			tmpFile.append(ft_itoa(nb));
+			tmpFile = handleCGI();
 			ifile.close();
-			int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
-			pid = fork();
-			int status = 0;
-			this->mEnv = setEnv("");
-			char **args = setEnv(this->mRequest->getFileExt()); // this->mRequest->getQuery()
-			try
-			{
-				if (pid == -1)
-					throw std::logic_error("500 Internal Server Error");
-				if(pid == 0)
-				{
-					dup2(tempFd, STDOUT_FILENO);
-					close(tempFd);
-					execve(args[0], args, this->mEnv);
-					exit(errno);
-				}
-				else if (waitpid(-1, &status, 0))
-				{
-					close(tempFd);
-					ws_destroy_array(args);
-					ws_destroy_array(this->mEnv);
-					// std::cerr << WEXITSTATUS(status) << "status "<< status << std::endl;
-					// std::cout << this->mEnv[0] << " !!!!RALF!!!! " << this->mEnv[1] << std::endl;
-					if (WIFEXITED(status) && WEXITSTATUS(status))
-						throw std::logic_error("500 Internal Server Error");
-					ifile.open(tmpFile.c_str());
-					getline(ifile, tmp);
-				}
-			}
-			catch(const std::logic_error& e)
-			{
-				this->errorHandler(e.what());
-			}
-			
-			/* 
-			(achtung leaking FDs)
-			*/
+			ifile.open(tmpFile.c_str());
+			getline(ifile, tmp);
 		}
 		while (getline(ifile, tmp))
 		{
@@ -603,10 +561,8 @@ char **httpServer::setEnv(std::string queryString)
 void httpServer::handleDirListing(void)
 {
 	std::ifstream 	ifile;
-	std::ofstream 	ofile;
 	std::string		tmp;
 	std::string		fileContent;
-	std::string 	tmpFile;
 
 	ifile.open("./www/dirlisting.html");
 	while (getline(ifile, tmp))
@@ -635,4 +591,51 @@ void httpServer::handleDirListing(void)
 
 	this->generateResponse(fileContent.size());
 	this->mResponse.append(fileContent);
+}
+
+std::string httpServer::handleCGI(void)
+{
+	std::string 	tmpFile;
+	std::string		tmp;
+
+
+	srand(time(NULL));
+	int	nb = rand();
+	pid_t pid = -1;
+	tmpFile = "/tmp/" + this->mRequest->getFileName();
+	tmpFile.append(ft_itoa(nb));
+	// ifile.close();
+	int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
+	pid = fork();
+	int status = 0;
+	this->mEnv = setEnv("");
+	char **args = setEnv(this->mRequest->getFileExt()); // this->mRequest->getQuery()
+	try
+	{
+		if (pid == -1)
+			throw std::logic_error("500 Internal Server Error");
+		if(pid == 0)
+		{
+			dup2(tempFd, STDOUT_FILENO);
+			close(tempFd);
+			execve(args[0], args, this->mEnv);
+			exit(errno);
+		}
+		else if (waitpid(-1, &status, 0))
+		{
+			close(tempFd);
+			ws_destroy_array(args);
+			ws_destroy_array(this->mEnv);
+			if (WIFEXITED(status) && WEXITSTATUS(status))
+				throw std::logic_error("500 Internal Server Error");
+		}
+	}
+	catch(const std::logic_error& e)
+	{
+		this->errorHandler(e.what());
+	}
+	return (tmpFile);
+	/* 
+	(achtung leaking FDs)
+	*/
 }
