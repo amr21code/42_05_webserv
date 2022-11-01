@@ -115,7 +115,7 @@ void	httpServer::receive(void)
 		try
 		{
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			if (!this->mRequest->getReqType().compare("POST") && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
+			if (this->mRequest->getReqType() == "POST" && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
 				this->fileUpload();
 			else
 				this->answer();
@@ -369,7 +369,7 @@ void	httpServer::answer(void)
 		this->mRespCode = "301 Moved Permanently";
 		this->generateResponse(0);
 	}
-	else if (this->mRequest->getDirListing() && !this->mRequest->getReqType().compare("GET"))
+	else if (this->mRequest->getDirListing() && this->mRequest->getReqType() == "GET")
 	{
 		try {
 			handleDirListing();
@@ -379,7 +379,7 @@ void	httpServer::answer(void)
 			throw e;
 		}
 	}
-	else if (!this->mRequest->getReqType().compare("GET") || !this->mRequest->getReqType().compare("POST"))
+	else if (this->mRequest->getReqType() == "GET" || this->mRequest->getReqType() == "POST")
 	{
 		ifile.open(this->mRequest->getResource().c_str());
 		try
@@ -410,7 +410,7 @@ void	httpServer::answer(void)
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
 	}
-	else if (!this->mRequest->getReqType().compare("DELETE"))
+	else if (this->mRequest->getReqType() == "DELETE")
 	{
 		ifile.open(this->mRequest->getResource().c_str());
 		try
@@ -447,7 +447,7 @@ void	httpServer::answer(std::string file)
 	if (!ifile.good())
 	{
 		ifile.close();
-		this->mRequest->setResource(this->mConfig->getDefaultMap()["error_page"], file);
+		this->mRequest->setResource(this->mConfig->getConfigMap()["error_page"], file);
 		ifile.open(this->mRequest->getResource().c_str());
 	}
 	while (getline(ifile, tmp))

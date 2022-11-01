@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   incl.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 09:38:54 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/01 14:52:41 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,6 @@
 #include <sys/wait.h>
 #include <dirent.h>
 #include <csignal>
-
-enum RequestType
-{
-	GET = 0,
-	POST,
-	DELETE
-};
 
 //errorChecks.cpp
 void						cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss);

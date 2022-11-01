@@ -6,7 +6,7 @@
 /*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 14:37:28 by raweber          ###   ########.fr       */
+/*   Updated: 2022/11/01 14:58:29 by raweber          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig config)
 		this->mResource.append(tempResourceFile);
 		this->mFileName = tempResourceFile;
 	}
-	else if (!this->mReqType.compare("GET"))
+	else if (this->mReqType == "GET")
 	{
 		if (config.getConfLocations()[this->mLocNb]["autoindex"].compare("off"))
 		{
