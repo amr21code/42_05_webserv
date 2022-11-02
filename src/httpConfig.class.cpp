@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 11:57:39 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/02 17:09:02 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ httpConfig::httpConfig(void)
 httpConfig::httpConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
-		std::cout << "httpConfig constructor with path" << configPath << std::endl;
+		std::cout << "httpConfig constructor with path " << configPath << std::endl;
 	this->mInitHttpConf();
 	try
 	{
@@ -43,7 +43,7 @@ httpConfig::~httpConfig(void)
 void httpConfig::mReadConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
-		std::cout << "readConfig with path" << configPath << std::endl;
+		std::cout << "readConfig with path " << configPath << std::endl;
 	std::ifstream 						ss;
 
 	std::string 						confLine;

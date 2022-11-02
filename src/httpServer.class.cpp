@@ -80,7 +80,7 @@ void	httpServer::listenSocket(void)
 	this->announce();
 }
 
-void	httpServer::receive(void)
+int	httpServer::receive(void)
 {
     if (DEBUG > 2)
 		std::cout << "httpServer receive" << std::endl;
@@ -88,52 +88,32 @@ void	httpServer::receive(void)
 	int					addrlen = sizeof(this->mSockAddr);
 	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
 	int					recv_return = 1;
+	int					tmpfd = -1;
+	std::string			tmpmsg;
 
-	//msgfd auf vector
-	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
-	if (this->mMsgFD < 0)
+	tmpfd = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
+	if (tmpfd < 0)
 	{
 		std::cerr << "Error: accept() failed" << std::endl;
-		return ;
+		return (-1);
 	}
-	this->mIncMsg = "";
-	while (this->mIncMsg.size() == 0)
+	tmpmsg = "";
+	while (tmpmsg.size() == 0)
 	{
-		while ((recv_return = recv(this->mMsgFD, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
+		while ((recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
 		{
 			if (DEBUG > 2)
 				std::cout << "httpServer received something" << std::endl;
-			if (this->mIncMsg.size() == 0)
-				this->mIncMsg = buffer.data();
+			if (tmpmsg.size() == 0)
+				tmpmsg = buffer.data();
 			else
-				this->mIncMsg.append(buffer.data(), recv_return); 
+				tmpmsg.append(buffer.data(), recv_return); 
 			buffer.assign(this->mcConfBufSize + 1, '\0');
 			usleep(100);
 		}
 	}
-	// in answer ->
-	if (this->mIncMsg.size() > 0)
-	{
-		try
-		{
-			// request auf vector
-			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
-			if (this->mRequest->getReqType() == "POST" && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
-				this->fileUpload();
-			else
-				this->answer();
-		}
-		catch(const std::exception& e)
-		{
-			this->errorHandler(e.what());
-		}
-		
-	}
-	else
-	{
-		this->errorHandler("400 Bad Request");
-	} 
-	// <- in answer
+	this->mMsg[tmpfd] = tmpmsg;
+	return (tmpfd);
 }
 
 void	httpServer::fileUpload(void)
@@ -266,16 +246,32 @@ void	httpServer::generateResponse(size_t fileSize)
 	this->mResponse.append("\r\nConnection: close\r\n\r\n");
 }
 
-void	httpServer::answer() // msgfd übergeben
+void	httpServer::answer(int fd)
 {
-	if (DEBUG > 2)
-		std::cout << "httpServer answer" << std::endl;
-
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
 	std::string 	tmpFile;
 
+	if (DEBUG > 2)
+		std::cout << "httpServer answer" << std::endl;
+	if (this->mMsg[fd].size() > 0)
+	{
+		try
+		{
+			this->mRequest = new httpRequest(this->mMsg[fd], *this->mConfig);
+			if (this->mRequest->getReqType() == "POST" && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
+				this->fileUpload();
+		}
+		catch(const std::exception& e)
+		{
+			this->errorHandler(fd, e.what());
+		}
+	}
+	else
+	{
+		this->errorHandler(fd, "400 Bad Request");
+	} 
 	if (this->mRequest->getRedirect())
 	{
 		this->mRespCode = "301 Moved Permanently";
@@ -283,7 +279,8 @@ void	httpServer::answer() // msgfd übergeben
 	}
 	else if (this->mRequest->getDirListing() && this->mRequest->getReqType() == "GET")
 	{
-		try {
+		try 
+		{
 			handleDirListing();
 		}
 		catch(const std::logic_error &e)
@@ -301,12 +298,12 @@ void	httpServer::answer() // msgfd übergeben
 		}
 		catch(const std::logic_error& e)
 		{
-			this->errorHandler(e.what());
+			this->errorHandler(fd, e.what());
 			return ;
 		}
 		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py") || !this->mRequest->getFileExt().compare("pl"))
 		{
-			tmpFile = handleCGI();
+			tmpFile = handleCGI(fd);
 			ifile.close();
 			ifile.open(tmpFile.c_str());
 			if (!this->mRequest->getFileExt().compare("php"))
@@ -335,7 +332,7 @@ void	httpServer::answer() // msgfd übergeben
 		}
 		catch(const std::logic_error& e)
 		{
-			this->errorHandler(e.what());
+			this->errorHandler(fd, e.what());
 			return ;
 		}
 		this->generateResponse(fileContent.size());
@@ -343,13 +340,12 @@ void	httpServer::answer() // msgfd übergeben
 	}
 	else
 		throw std::logic_error("405 Method Not Allowed");
-	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
+	send(fd, this->mResponse.c_str(), this->mResponse.size(), 0);
 	// if send fails -> remove msgfd from epoll
 	delete this->mRequest;
-	close(this->mMsgFD);
 }
 
-void	httpServer::answer(std::string file)
+void	httpServer::answer(int fd, std::string file)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer answer with file" << std::endl;
@@ -374,12 +370,12 @@ void	httpServer::answer(std::string file)
 	// std::cout << this->mResponse << std::endl;
 	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
 	// flag MSG_DONTWAIT statt 0 und nach EAGAIN/EWOULDBLOCK abfragen
-	if (send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0) <= 0)
-	close(this->mMsgFD);
+	if (send(fd, this->mResponse.c_str(), this->mResponse.size(), 0) <= 0)
+	// close(this->mMsgFD);
 	this->mRespCode = "200 OK";
 }
 
-void	httpServer::errorHandler(std::string error)
+void	httpServer::errorHandler(int fd, std::string error)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer errorHandler" << std::endl;
@@ -390,38 +386,38 @@ void	httpServer::errorHandler(std::string error)
 	switch (errorNo)
 	{
 		case 201:
-			this->answer("201created.html");
+			this->answer(fd, "201created.html");
 			break;
 		case 400:
-			this->answer("400bad_request.html");
+			this->answer(fd, "400bad_request.html");
 			break;
 		case 401:
-			this->answer("401unauthorized.html");
+			this->answer(fd, "401unauthorized.html");
 			break;
 		case 402:
-			this->answer("000default.html");
+			this->answer(fd, "000default.html");
 			break;
 		case 403:
-			this->answer("403forbidden.html");
+			this->answer(fd, "403forbidden.html");
 			break;
 		case 404:
-			this->answer("404not_found.html");
+			this->answer(fd, "404not_found.html");
 			break;
 		case 405:
-			this->answer("405method_not_allowed.html");
+			this->answer(fd, "405method_not_allowed.html");
 			break;
 		case 413:
-			this->answer("413req_entity_too_large.html");
+			this->answer(fd, "413req_entity_too_large.html");
 			break;
 		case 500:
-			this->answer("500internal_server_error.html");
+			this->answer(fd, "500internal_server_error.html");
 			break;
 		case 505:
-			this->answer("505httpvernotsupported.html");
+			this->answer(fd, "505httpvernotsupported.html");
 			break;
 		
 		default:
-			this->answer("000default.html");
+			this->answer(fd, "000default.html");
 	}
 }
 
@@ -430,11 +426,6 @@ void	httpServer::announce(void) const
 	std::cout << C_GREEN << "Server" << C_GREY << " ( " << this->mConfig->getHost() << ":";
 	std::cout << this->mConfig->getPort() << " ) " << this->mConfig->getServerNames();
 	std::cout << C_DEF << C_GREEN << " started" << C_DEF << std::endl;
-}
-
-int		httpServer::getMsgFD(void)
-{
-	return(this->mMsgFD);
 }
 
 int		httpServer::getSocket(void)
@@ -520,7 +511,7 @@ void httpServer::handleDirListing(void)
 	this->mResponse.append(fileContent);
 }
 
-std::string httpServer::handleCGI(void)
+std::string httpServer::handleCGI(int fd)
 {
 	std::string 	tmpFile;
 	std::string		tmp;
@@ -559,10 +550,14 @@ std::string httpServer::handleCGI(void)
 	}
 	catch(const std::logic_error& e)
 	{
-		this->errorHandler(e.what());
+		this->errorHandler(fd, e.what());
 	}
 	return (tmpFile);
 	/* 
 	(achtung leaking FDs)
 	*/
+}
+std::map<int, std::string>	httpServer::getMsg(void)
+{
+	return (this->mMsg);
 }

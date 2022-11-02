@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 11:42:57 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/02 17:43:41 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ httpRequest::httpRequest(void)
 		std::cout << "httpRequest default constructor" << std::endl; 
 }
 
-httpRequest::httpRequest(std::string msg, httpConfig config)
+httpRequest::httpRequest(std::string msg, httpConfig &config)
 {
 	if (DEBUG > 2)
 		std::cout << "httpRequest constructor with message" << std::endl;
@@ -65,7 +65,7 @@ httpRequest::httpRequest(std::string msg, httpConfig config)
 	this->mPayload = msg.substr(payloadindex + 4);
 }
 
-httpRequest::httpRequest(std::string errorFile, httpConfig config, int flag)
+httpRequest::httpRequest(std::string errorFile, httpConfig &config, int flag)
 {
 	(void) flag;
 	if (DEBUG > 2)
@@ -107,7 +107,7 @@ void httpRequest::setResource(std::string defFolder, std::string errFile) {
 	this->mResource.append(errFile);
 }
 
-void httpRequest::firstLineHandler(std::string msg, httpConfig config)
+void httpRequest::firstLineHandler(std::string msg, httpConfig &config)
 {
 	std::string	tempResourceDir = "/";
 	std::string	tempResourceFile;

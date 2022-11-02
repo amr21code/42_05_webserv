@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:50 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 14:38:00 by raweber          ###   ########.fr       */
+/*   Updated: 2022/11/02 17:43:40 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,15 @@ class httpRequest
 {
     public:
 		httpRequest(void);
-		httpRequest(std::string msg, httpConfig config);
-		httpRequest(std::string errorFile, httpConfig config, int flag);
+		httpRequest(std::string msg, httpConfig &config);
+		httpRequest(std::string errorFile, httpConfig &config, int flag);
 		~httpRequest(void);
 		
 		std::string getResource(void) const;
 		std::string getReqType(void) const;
 		void		setResource(std::string defFolder, std::string errFile);
 		std::string	getPayload(void) const;
-		void		firstLineHandler(std::string msg, httpConfig config);
+		void		firstLineHandler(std::string msg, httpConfig &config);
 		std::string	getFileExt(void) const;
 		std::string getFileName(void) const;
 		std::string getQuery(void) const;

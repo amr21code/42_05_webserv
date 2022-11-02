@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   incl.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/01 14:52:41 by raweber          ###   ########.fr       */
+/*   Updated: 2022/11/02 17:07:42 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define C_MAGENTA "\033[35m"
 # define C_WHITE "\033[37m"
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 3
 #endif
 #include <iostream>
 #include <sstream>
