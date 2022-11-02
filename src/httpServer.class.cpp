@@ -89,6 +89,7 @@ void	httpServer::receive(void)
 	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
 	int					recv_return = 1;
 
+	//msgfd auf vector
 	this->mMsgFD = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
 	if (this->mMsgFD < 0)
 	{
@@ -110,10 +111,12 @@ void	httpServer::receive(void)
 			usleep(100);
 		}
 	}
+	// in answer ->
 	if (this->mIncMsg.size() > 0)
 	{
 		try
 		{
+			// request auf vector
 			this->mRequest = new httpRequest(this->mIncMsg, *this->mConfig);
 			if (this->mRequest->getReqType() == "POST" && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
 				this->fileUpload();
@@ -130,6 +133,7 @@ void	httpServer::receive(void)
 	{
 		this->errorHandler("400 Bad Request");
 	} 
+	// <- in answer
 }
 
 void	httpServer::fileUpload(void)
@@ -210,98 +214,6 @@ void	httpServer::fileUpload(void)
 		else
 			throw std::logic_error("500 Internal Server Error");
 	}
-
-	// int len = 0;
-	// int num = 0;
-	// char **fields = NULL;
-	// char *env = getenv("CONTENT_TYPE");
-	// int boundary_len = 0;
-
-	// if( tec_buf_begins(env, "multipart/form-data; boundary") ){
-
-	// 	char *buffer;
-	// 	char *original_buffer;
-	// 	char *boundary = env + 30;
-	// 	boundary_len = tec_string_length(boundary);
-	// 	char *cont_len = getenv("CONTENT_LENGTH");
-	// 	int original_len = 0;
-
-	// 	if(cont_len){
-	// 		len = tec_string_to_int(cont_len);
-	// 		original_len = len;
-	// 		len += 1;
-
-	// 		buffer = (char *) malloc(sizeof(char) * len );
-	// 		fread(buffer, sizeof(char), len, stdin);
-	// 	}
-	// 	original_buffer = buffer;
-
-	// 	//first counting how many boundaries
-	// 	int next = tec_buf_find_str(buffer, len, boundary);
-
-	// 	while(next != -1){
-
-	// 		buffer += boundary_len + next;
-	// 		len -= (boundary_len + next);
-	// 		num += 1;
-	// 		next = tec_buf_find_str(buffer, len, boundary);
-	// 	}
-
-	// 	num *= 4;
-	// 	num += 1;
-	// 	len = original_len;
-	// 	int index = 0;
-	// 	fields = (char **) malloc(sizeof(char *) * num );
-	// 	memset(fields, 0, sizeof(char *) * num  );
-	// 	buffer = original_buffer;
-	// 	next = tec_buf_find_str(buffer, len, boundary);
-	// 	while(next != -1){
-	// 		buffer += next - 4;
-	// 		len -= (next - 4);
-	// 		*buffer = 0;
-	// 		buffer += boundary_len + 4;
-	// 		len -= (boundary_len + 4);
-	// 		if(tec_buf_begins(buffer, "\r\nContent-Disposition: form-data;") ){
-	// 			int n = tec_string_find_char(buffer, '\"');
-	// 			buffer += n + 1;
-	// 			len -= (n + 1);
-	// 			fields[index] = buffer;
-	// 			index += 1;
-	// 			n = tec_string_find_char(buffer, '\"');
-	// 			buffer += n;
-	// 			len -= n;
-	// 			*buffer = 0;
-	// 			buffer += 1;
-	// 			len -= 1;
-	// 			if(*buffer == ';'){
-	// 				n = tec_string_find_char(buffer, '\"');
-	// 				buffer += n + 1;
-	// 				len -= (n + 1);
-	// 				fields[index] = buffer;
-	// 				index += 1;
-	// 				n = tec_string_find_char(buffer, '\"');
-	// 				buffer += n;
-	// 				len -= n;
-	// 				*buffer = 0;
-	// 				buffer += 1;
-	// 				len -= 1;
-	// 				n = tec_string_find_str(buffer, "\r\n\r\n");
-	// 				buffer += n + 4;
-	// 				len -= (n + 4);
-	// 				fields[index] = fields[index - 2];
-	// 				index += 1;
-	// 				fields[index] = buffer;
-
-	// 			}else{
-	// 				buffer += 4;
-	// 				len -= 4;
-	// 				fields[index] = buffer;
-	// 			}
-	// 			index += 1;
-	// 		}
-	// 		next = tec_buf_find_str(buffer, len, boundary);
-	// 	}
-
 }
 
 
@@ -354,7 +266,7 @@ void	httpServer::generateResponse(size_t fileSize)
 	this->mResponse.append("\r\nConnection: close\r\n\r\n");
 }
 
-void	httpServer::answer(void)
+void	httpServer::answer() // msgfd übergeben
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer answer" << std::endl;
@@ -397,7 +309,8 @@ void	httpServer::answer(void)
 			tmpFile = handleCGI();
 			ifile.close();
 			ifile.open(tmpFile.c_str());
-			getline(ifile, tmp);
+			if (!this->mRequest->getFileExt().compare("php"))
+				getline(ifile, tmp);
 		}
 		while (getline(ifile, tmp))
 		{
@@ -431,6 +344,7 @@ void	httpServer::answer(void)
 	else
 		throw std::logic_error("405 Method Not Allowed");
 	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
+	// if send fails -> remove msgfd from epoll
 	delete this->mRequest;
 	close(this->mMsgFD);
 }
@@ -460,7 +374,7 @@ void	httpServer::answer(std::string file)
 	// std::cout << this->mResponse << std::endl;
 	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
 	// flag MSG_DONTWAIT statt 0 und nach EAGAIN/EWOULDBLOCK abfragen
-	send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0);
+	if (send(this->mMsgFD, this->mResponse.c_str(), this->mResponse.size(), 0) <= 0)
 	close(this->mMsgFD);
 	this->mRespCode = "200 OK";
 }

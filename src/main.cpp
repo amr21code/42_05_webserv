@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 11:01:37 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/02 12:56:53 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	main(int argc, char **argv)
 	std::vector<httpServer *> 	serverVector;
 	int							epfd = epoll_create(256);
 	struct epoll_event			epevent;
-	epevent.events = EPOLLIN; // |EPOLLOUT; // check later, if uploading files works without EPOLLOUT
+	epevent.events = EPOLLIN|EPOLLOUT; // check later, if uploading files works without EPOLLOUT
 	try
 	{
 		if (epfd == -1)
@@ -113,15 +113,15 @@ int	main(int argc, char **argv)
 	{
 		try
 		{
-			epevent.data.u32 = i;
-			epevent.data.u64 = 42;
-			epevent.data.ptr = NULL;
+			// epevent.data.u32 = i;
+			// epevent.data.u64 = 42;
+			// epevent.data.ptr = NULL;
 			confVector.push_back(new httpConfig(configPath, i + 1));
 			serverVector.push_back(new httpServer(confVector[i]));
 			epevent.data.fd = serverVector[i]->getSocket();
 			serverVector[i]->listenSocket();
 			if (epoll_ctl(epfd, EPOLL_CTL_ADD, serverVector[i]->getSocket(), &epevent))
-				throw std::logic_error("Error: Failed to add file descriptor to epoll");
+				throw std::logic_error("Error (1): Failed to add file descriptor to epoll");
 		}
 		catch(const std::exception& e)
 		{
@@ -156,7 +156,31 @@ int	main(int argc, char **argv)
 				for (int j = 0; j < countServers; j++)
 				{
 					if (serverVector[j]->getSocket() == epevents[i].data.fd)
-						serverVector[j]->receive();
+					{
+						if (epevents[i].events == EPOLLIN)
+						{
+							serverVector[j]->receive();
+							epevent.data.fd = serverVector[j]->getMsgFD();
+							if (epoll_ctl(epfd, EPOLL_CTL_ADD, serverVector[j]->getMsgFD(), &epevent))
+								throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
+						}
+					}
+					else
+					{
+						//for (int k = 0; k < getservermsgfdsize; k++)
+						//{
+						if (serverVector[j]->getMsgFD() == epevents[i].data.fd)
+						{
+							if (epevents[i].events == EPOLLOUT)
+							{
+								//wenn  epevents[i].data.fd == msgfd aus vector -> index an answer
+								serverVector[j]->answer();
+								if (epoll_ctl(epfd, EPOLL_CTL_DEL, serverVector[j]->getMsgFD(), &epevent))
+									throw std::logic_error("Error: Failed to delete file descriptor to epoll");
+							}
+						}
+						//}
+					}
 				}
 			}
 		}
