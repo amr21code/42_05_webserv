@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 09:33:30 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/02 11:57:39 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,16 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 				it->second.append("/");
 			if (it->first == "root" && it->second[it->second.size() - 1] != '/')
 				it->second.append("/");
+			if (it->first == "allowed_methods")
+			{
+				std::vector<std::string> tmpMethods = explode(it->second, ",");
+				for (std::vector<std::string>::iterator itmeth = tmpMethods.begin(); itmeth != tmpMethods.end(); itmeth++)
+				{
+					if ((*itmeth).compare("GET") && (*itmeth).compare("POST") && (*itmeth).compare("DELETE"))
+						throw std::logic_error("Error: Invalid request method in config");
+				}
+
+			}
 			// std::cout << it->first << " " << it->second << std::endl;
 		}
 	}

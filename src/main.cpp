@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/31 14:20:49 by raweber          ###   ########.fr       */
+/*   Updated: 2022/11/02 11:01:37 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int	main(int argc, char **argv)
 	}
 	std::vector<httpConfig *> 	confVector;
 	std::vector<httpServer *> 	serverVector;
-	int							epfd = epoll_create(1);
+	int							epfd = epoll_create(256);
 	struct epoll_event			epevent;
 	epevent.events = EPOLLIN; // |EPOLLOUT; // check later, if uploading files works without EPOLLOUT
 	try
@@ -114,11 +114,11 @@ int	main(int argc, char **argv)
 		try
 		{
 			epevent.data.u32 = i;
-			epevent.data.fd = -1;
-			epevent.data.u64 = 0;
+			epevent.data.u64 = 42;
 			epevent.data.ptr = NULL;
 			confVector.push_back(new httpConfig(configPath, i + 1));
 			serverVector.push_back(new httpServer(confVector[i]));
+			epevent.data.fd = serverVector[i]->getSocket();
 			serverVector[i]->listenSocket();
 			if (epoll_ctl(epfd, EPOLL_CTL_ADD, serverVector[i]->getSocket(), &epevent))
 				throw std::logic_error("Error: Failed to add file descriptor to epoll");
@@ -150,9 +150,14 @@ int	main(int argc, char **argv)
 		{
 			for(int i = 0; i < event_count; i++)
 			{
-				//std::cout<< "servers " << countServers <<" data.u32 "<< epevents[i].data.u32 << std::endl;
-				//std::cout<< "socket " << countServers <<serverVector[epevents[i].data.u32]->getSocket() << std::endl;
-				serverVector[epevents[i].data.u32]->receive();
+				// std::cout<< "servers " << countServers <<" data.u32 "<< epevents[i].data.u32 << std::endl;
+				// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
+				// std::cout<< "socket " << countServers <<serverVector[epevents[i].data.u32]->getSocket() << std::endl;
+				for (int j = 0; j < countServers; j++)
+				{
+					if (serverVector[j]->getSocket() == epevents[i].data.fd)
+						serverVector[j]->receive();
+				}
 			}
 		}
 	}

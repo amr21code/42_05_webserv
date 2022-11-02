@@ -128,7 +128,7 @@ void	httpServer::receive(void)
 	}
 	else
 	{
-		this->errorHandler("400bad_request.html");
+		this->errorHandler("400 Bad Request");
 	} 
 }
 
@@ -447,7 +447,7 @@ void	httpServer::answer(std::string file)
 	if (!ifile.good())
 	{
 		ifile.close();
-		this->mRequest->setResource(this->mConfig->getConfigMap()["error_page"], file);
+		this->mRequest->setResource(this->mConfig->getDefaultMap()["error_page"], file);
 		ifile.open(this->mRequest->getResource().c_str());
 	}
 	while (getline(ifile, tmp))
@@ -495,6 +495,9 @@ void	httpServer::errorHandler(std::string error)
 			break;
 		case 405:
 			this->answer("405method_not_allowed.html");
+			break;
+		case 413:
+			this->answer("413req_entity_too_large.html");
 			break;
 		case 500:
 			this->answer("500internal_server_error.html");
