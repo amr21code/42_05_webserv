@@ -285,7 +285,8 @@ void	httpServer::answer(int fd)
 		}
 		catch(const std::logic_error &e)
 		{
-			throw e;
+			this->errorHandler(fd, e.what());
+			return ;
 		}
 	}
 	else if (this->mRequest.getReqType() == "GET" || this->mRequest.getReqType() == "POST")
@@ -340,9 +341,9 @@ void	httpServer::answer(int fd)
 	}
 	else
 		throw std::logic_error("405 Method Not Allowed");
-	std::cout << "before send" << std::endl;
+	// std::cout << "before send" << std::endl;
 	send(fd, this->mResponse.c_str(), this->mResponse.size(), 0);
-	std::cout << "after send" << std::endl;
+	// std::cout << "after send" << std::endl;
 	// if send fails -> remove msgfd from epoll
 	// delete this->mRequest;
 }

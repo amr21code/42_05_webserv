@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 11:22:45 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 13:54:41 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ int	main(int argc, char **argv)
 						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
 						if (serverVector[j]->getSocket() == epevents[i].data.fd)
 						{
-							std::cout << "TEST1" << std::endl;
+							// std::cout << "TEST1" << std::endl;
 							if (epevents[i].events == EPOLLIN)
 							{
 								tmpfd = serverVector[j]->receive();
@@ -166,8 +166,9 @@ int	main(int argc, char **argv)
 						}
 						else if (serverVector[j]->getMsg().size())
 						{
-							std::cout << "TEST2" << std::endl;
-							for (std::map<int, std::string>::iterator itmsg = serverVector[j]->getMsg().begin(); itmsg != serverVector[j]->getMsg().end(); itmsg++)
+							// std::cout << "TEST2" << std::endl;
+							std::map<int, std::string> tmpMap = serverVector[j]->getMsg();
+							for (std::map<int, std::string>::iterator itmsg = tmpMap.begin(); itmsg != tmpMap.end(); itmsg++)
 							{
 								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
@@ -192,7 +193,7 @@ int	main(int argc, char **argv)
 						}
 					}
 				// new_event:
-					std::cout << "endloop " << i <<std::endl;
+					// std::cout << "endloop " << i <<std::endl;
 				}
 			}
 		}
