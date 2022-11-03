@@ -91,19 +91,14 @@ void	httpServer::listenSocket(void)
 	this->announce();
 }
 
-/**
- * @brief receives incomming message on socket 
- */
-int	httpServer::receive(void)
+
+int	httpServer::acceptSocket(void)
 {
-    if (DEBUG > 2)
-		std::cout << "httpServer receive" << std::endl;
+	if (DEBUG > 2)
+		std::cout << "httpServer accept" << std::endl;
 
 	int					addrlen = sizeof(this->mSockAddr);
-	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
-	int					recv_return = 1;
 	int					tmpfd = -1;
-	std::string			tmpmsg;
 
 	tmpfd = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
 	if (tmpfd < 0)
@@ -111,32 +106,51 @@ int	httpServer::receive(void)
 		std::cerr << "Error: accept() failed" << std::endl;
 		return (-1);
 	}
-	tmpmsg = "";
+	return (tmpfd);
+}
+
+/**
+ * @brief receives incomming message on socket 
+ */
+void	httpServer::receive(int fd)
+{
+    if (DEBUG > 2)
+		std::cout << "httpServer receive" << std::endl;
+
+	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
+	int					recv_return = 1;
+
+	// tmpfd = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
+	// if (tmpfd < 0)
+	// {
+	// 	std::cerr << "Error: accept() failed" << std::endl;
+	// 	return (-1);
+	// }
 	// while (tmpmsg.size() == 0)
 	// {
 		// usleep(100);
 			// recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
 		// while (recv_return > 0)
 		// {
-			recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
+			recv_return = recv(fd, buffer.data(), this->mcConfBufSize, 0);
 			if (!recv_return)
 			{
 				std::cerr << "Error: client closed connection" << recv_return << std::endl;
-				close(tmpfd);
-				return (-1);
+				close(fd);
+				return ;
 			}
-			else if (recv_return < 0)
+			else if (recv_return < 0 && (static_cast<std::string>(buffer.data())).size() == 0)
 			{
-				std::cerr << "Error: recv() failed" << recv_return << std::endl;
-				close(tmpfd);
-				return (-1);
+				std::cerr << "Error: recv() failed " << recv_return << std::endl;
+				close(fd);
+				return ;
 			}
 			if (DEBUG > 2)
 				std::cout << "httpServer received something" << std::endl;
-			if (this->mMsg[tmpfd].size() == 0)
-				this->mMsg[tmpfd] = tmpmsg;
+			if (this->mMsg[fd].size() == 0)
+				this->mMsg[fd] = buffer.data();
 			else
-				this->mMsg[tmpfd].append(tmpmsg);
+				this->mMsg[fd].append(buffer.data());
 			// if (tmpmsg.size() == 0)
 			// 	tmpmsg = buffer.data();
 			// else
@@ -147,7 +161,7 @@ int	httpServer::receive(void)
 	// 	}
 	// }
 	// this->mMsg[tmpfd] = tmpmsg;
-	return (tmpfd);
+	std::cout << "fd " << fd << " msg " << this->mMsg[fd] << std::endl;
 }
 
 /**

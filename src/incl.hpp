@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 17:07:42 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 14:54:30 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,5 +56,7 @@ std::vector<std::string>	explodeOneLine(std::string confLine, std::string str);
 std::string 				ft_itoa(int nb);
 void						ws_single_desctruct(void *str);
 void						ws_destroy_array(char **argv);
+void						si_handler_shell(int sig);
+void						si_init_sighandling(void);
 
 #endif

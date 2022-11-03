@@ -3,26 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 14:47:37 by djedasch         ###   ########.fr       */
+/*   Updated: 2022/11/03 16:14:08 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "incl.hpp"
 #include "httpServer.class.hpp"
 #include <exception>
 
 bool gShutdown = false;
 
-void	*startServer(void *arg)
-{
-	if (DEBUG > 2)
-		std::cout << "main startServer" << std::endl;
-	httpServer *tmp = (httpServer *)arg;
-	tmp->listenSocket();
-	return (0);
-}
+void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, int actualServers, int epfd);
 
 int	main(int argc, char **argv)
 {
@@ -96,44 +90,51 @@ int	main(int argc, char **argv)
 		{
 			if (event_count < 0 && !gShutdown)
 				throw std::logic_error("Error: epoll_wait() failed");
-			// std::cout << epevent.events << std::endl;
 			if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
 			{
 				for(int i = 0; i < event_count; i++)
 				{
-					// std::cout << "i " << i << " ev cnt " << event_count << std::endl;
-					// std::cout<< "servers " << countServers << std::endl;
-					// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
+					std::cout << epevents[i].events << std::endl;
+					std::cout << "i " << i << " ev cnt " << event_count << std::endl;
+					std::cout<< "servers " << countServers << std::endl;
+					std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
 					{
-						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
+						std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
+						std::cout <<" message size " << serverVector[j]->getMsg()[epevents[i].data.fd].size() << std::endl;
 						if (serverVector[j]->getSocket() == epevents[i].data.fd)
 						{
-							std::cout << "TEST1" << std::endl;
-							if (epevents[i].events == EPOLLIN)
+							std::cout << "ACCEPT SOCKET" << std::endl;
+							if (epevents[i].events & EPOLLIN)
 							{
-								tmpfd = serverVector[j]->receive();
+								tmpfd = serverVector[j]->acceptSocket();
 								// std::cout<< "tmpfd " << tmpfd << std::endl;
 								if (tmpfd > 2)
 								{
 									epevent.data.fd = tmpfd;
 									if (epoll_ctl(epfd, EPOLL_CTL_ADD, tmpfd, &epevent))
 										throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
+									serverVector[j]->receive(tmpfd);
 								}
 								// goto new_event;
 							}
 						}
-						else if (serverVector[j]->getMsg().size() > 13)
+						else
 						{
-							// std::cout << "TEST2" << std::endl;
+							std::cout << "SEND/RECV TO FD" << std::endl;
 							std::map<int, std::string> tmpMap = serverVector[j]->getMsg();
 							for (std::map<int, std::string>::iterator itmsg = tmpMap.begin(); itmsg != tmpMap.end(); itmsg++)
 							{
-								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+								std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
 								{
-								// std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
-									if (epevents[i].events == EPOLLOUT)
+								std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+									if (epevents[i].events & EPOLLIN)
+									{
+										serverVector[j]->receive(epevents[i].data.fd);
+										std::cout << "TEST EPOLLIN" << std::endl;
+									}
+									else if (epevents[i].events & EPOLLOUT)
 									{
 										if (serverVector[j]->generateRequest(itmsg->first))
 											break ;
@@ -154,10 +155,6 @@ int	main(int argc, char **argv)
 								}
 							}
 						}
-						else
-						{
-							//! error weil message zu kurz?
-						}
 					}
 				}
 			}
@@ -169,4 +166,51 @@ int	main(int argc, char **argv)
 	}
 	destroyAllocs(confVector, serverVector, countServers, epfd);
 	return 0;
+}
+
+
+/**
+ * @brief sets gShutdown to true if pressed ctrl+c
+ */
+void	si_handler_shell(int sig)
+{
+	if (sig == SIGINT)
+	{
+		gShutdown = true;
+	}
+}
+
+void	*startServer(void *arg)
+{
+	if (DEBUG > 2)
+		std::cout << "main startServer" << std::endl;
+	httpServer *tmp = (httpServer *)arg;
+	tmp->listenSocket();
+	return (0);
+}
+
+
+/**
+ * @brief frees memory when called
+ */
+void	destroyAllocs(std::vector<httpConfig *> confVector, std::vector<httpServer *> serverVector, int actualServers, int epfd)
+{
+	if (DEBUG > 2)
+		std::cout << "main destroyAllocs" << std::endl;
+	for (long unsigned int i = 0; i < static_cast<long unsigned int> (actualServers); i++)
+	{
+		if (confVector.size() > i)
+			delete confVector[i];
+		if (serverVector.size() > i)
+			delete serverVector[i];
+	}
+	try
+	{
+		if (close(epfd))
+			throw std::logic_error("Error: Failed to close epoll file descriptor");
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 }
