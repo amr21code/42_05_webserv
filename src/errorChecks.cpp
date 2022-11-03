@@ -3,16 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   errorChecks.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: raweber <raweber@student.42wolfsburg.de    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/11 14:15:37 by anruland          #+#    #+#             */
-/*   Updated: 2022/10/29 09:06:50 by raweber          ###   ########.fr       */
+/*   Updated: 2022/11/03 14:33:16 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpServer.class.hpp"
 #include <exception>
 
+/**
+ * @brief check for error in config location
+ * 
+ * @param confLine 
+ * @param ss 
+ */
 void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
 {
 	if (ss.peek() == std::ifstream::traits_type::eof())
@@ -35,6 +41,12 @@ void cfgLocationErrorCheck(std::string &confLine, std::ifstream &ss)
 	}
 }
 
+/**
+ * @brief check for invalid configurations in config file
+ * 
+ * @param configPath 
+ * @return int 
+ */
 int	cfgErrorCheck(std::string configPath)
 {
 	std::ifstream ss;
@@ -97,6 +109,13 @@ int	cfgErrorCheck(std::string configPath)
 	return (countServers);
 }
 
+/**
+ * @brief split confLine at str
+ * 
+ * @param confLine 
+ * @param str 
+ * @return std::vector<std::string> 
+ */
 std::vector<std::string> explode(std::string confLine, std::string str)
 {
 	std::vector<std::string> ret_vector;
@@ -105,7 +124,6 @@ std::vector<std::string> explode(std::string confLine, std::string str)
 	
 	while (strPosNext != std::string::npos)
 	{
-		// ret_vector.push_back(confLine.substr(strPos + 1, confLine.length() - 1));
 		ret_vector.push_back(confLine.substr(strPosLast, (strPosNext - strPosLast)));
 		strPosLast = strPosNext + str.length();
 		strPosNext = confLine.find(str, strPosLast);
@@ -114,6 +132,13 @@ std::vector<std::string> explode(std::string confLine, std::string str)
 	return (ret_vector);
 }
 
+/**
+ * @brief split confLine at first c
+ * 
+ * @param confLine 
+ * @param c 
+ * @return std::vector<std::string> 
+ */
 std::vector<std::string> explode(std::string confLine, char c)
 {
 	std::vector<std::string> ret_vector;
@@ -124,6 +149,14 @@ std::vector<std::string> explode(std::string confLine, char c)
 	return (ret_vector);
 }
 
+
+/**
+ * @brief split confLine at first str
+ * 
+ * @param confLine 
+ * @param str 
+ * @return std::vector<std::string> 
+ */
 std::vector<std::string> explodeOneLine(std::string confLine, std::string str)
 {
 	std::vector<std::string> ret_vector;

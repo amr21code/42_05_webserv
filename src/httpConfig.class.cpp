@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpConfig.class.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 13:46:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 17:09:02 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 14:36:34 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ httpConfig::httpConfig(std::string configPath, int elem)
 	catch(const std::logic_error& e)
 	{
 		throw e;
-		// std::cerr << e.what() << '\n';
 	}
 }
 
@@ -40,6 +39,9 @@ httpConfig::~httpConfig(void)
 		std::cout << "httpConfig destructor" << std::endl;
 }
 
+/**
+ * @brief opens stream from config file and reads it
+ */
 void httpConfig::mReadConfig(std::string configPath, int elem)
 {
 	if (DEBUG > 2)
@@ -84,7 +86,7 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 				while (getline(ss, confLine))
 				{
 					confLine.erase(std::remove(confLine.begin(), confLine.end(), '\t'), confLine.end());
-					if (confLine.find("</location>") < confLine.npos) // just to skip
+					if (confLine.find("</location>") < confLine.npos) 
 						break ;
 					tmp = explode(confLine, ':');
 					std::map<std::string, std::string>::iterator it;
@@ -108,7 +110,6 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 	{
 		if (it->second == "")
 			it->second = this->mConfigDefault[it->first];
-		// std::cout << it->first << " " << it->second << std::endl;
 	}
 	for (std::vector<std::map<std::string, std::string> >::iterator itv = this->mConfLocations.begin(); itv != this->mConfLocations.end(); itv++)
 	{
@@ -130,13 +131,15 @@ void httpConfig::mReadConfig(std::string configPath, int elem)
 					if ((*itmeth).compare("GET") && (*itmeth).compare("POST") && (*itmeth).compare("DELETE"))
 						throw std::logic_error("Error: Invalid request method in config");
 				}
-
 			}
-			// std::cout << it->first << " " << it->second << std::endl;
 		}
 	}
 }
 
+/**
+ * @brief inits all map values by default
+ * 
+ */
 void	httpConfig::mInitHttpConf(void)
 {
 	this->mConfigMap["server_names"] = "";
@@ -201,20 +204,8 @@ std::map<std::string, std::string>	httpConfig::getDefaultMap(void)
 {
 	return(this->mConfigDefault);
 }
-// std::string httpConfig::getErrors(void)
-// {
-// }
 
 size_t httpConfig::getMaxBodySize(void) {
 
 	return(atoi(this->mConfigMap["client_max_body_size"].c_str()));	
 };
-
-// std::vector<std::string>	httpConfig::getMethods(void) {
-	
-// };
-
-// std::vector<std::string>	httpConfig::getCGI(void)
-// {
-    
-// };
