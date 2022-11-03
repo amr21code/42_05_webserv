@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpServer.class.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 13:30:40 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 14:29:06 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class httpServer
 
 	private:
 		//config
-		static const int			mcConfDomain = AF_INET;  //m = member, c = const, Conf = config
+		static const int			mcConfDomain = AF_INET; 
 		static const int			mcConfComType = SOCK_STREAM;
 		static const int			mcConfProtocol = 0;
 		static const int			mcConfBufSize = 2048;

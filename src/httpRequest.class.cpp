@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 10:30:22 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 14:37:23 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,6 @@ httpRequest::httpRequest(std::string msg, httpConfig &config)
 	this->mRedirect = false;
 	this->mError = false;
 	tmpLines = explode(msg, "\r\n");
-	// std::cout << "!!!!!!!!!!!!!!!ralf begin" << std::endl;
-	// std::cout << msg << std::endl;
-	// std::cout << "!!!!!!!!!!!!!!!ralf end" << std::endl;
 	std::vector<std::string>::iterator it = tmpLines.begin();
 	try
 	{
@@ -41,19 +38,8 @@ httpRequest::httpRequest(std::string msg, httpConfig &config)
 			if (!(*it).compare(0, 29, "-----------------------------"))
 				break;
 			tmpElements = explodeOneLine(*it, ": ");
-			// std::cout << "tmpElements[0] " << tmpElements[0] << "; tmpElements[1] " << tmpElements[1] << std::endl;
 			this->mRequest[tmpElements[0]] = tmpElements[1];
 		}
-		// std::vector<std::string>::iterator itt = tmpLines.begin();
-		// for (; itt!= tmpLines.end(); itt++)
-		// {
-		// 	std::cout << "0" << *itt << std::endl;
-		// }
-		// std::map<std::string, std::string>::iterator ite = this->mRequest.begin();
-		// for (; ite != this->mRequest.end(); ite++)
-		// {
-		// 	std::cout << ite->first << "-" << ite->second << std::endl;
-		// }
 	}
 	catch(const std::logic_error& e)
 	{
@@ -109,6 +95,9 @@ void httpRequest::setResource(std::string defFolder, std::string errFile) {
 	this->mResource.append(errFile);
 }
 
+/**
+ * @brief parse the first line of request header
+ */
 void httpRequest::firstLineHandler(std::string msg, httpConfig &config)
 {
 	std::string	tempResourceDir = "/";
@@ -129,22 +118,17 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig &config)
 	{
 		this->mQuery = this->mResource.substr(this->mResource.find('?') + 1);
 		this->mResource.erase(this->mResource.find('?'));
-		// std::cout << "remaining resource " << this->mResource << std::endl;
-		// std::cout << "query " << this->mQuery << std::endl;
 	}
 	if (this->mResource[this->mResource.size() - 1] != '/')
 	{
 		if (this->mResource.find_last_of(".") == this->mResource.npos)
 				this->mResource.append("/");
 		tempResourceFile = this->mResource.substr(this->mResource.find_last_of('/') + 1);
-		// std::cout << "Temp Resource Dir is: " << tempResourceDir << std::endl;
-		// std::cout << "Temp Resource File is: " << tempResourceFile << std::endl;
 	}
 	tempResourceDir = this->mResource.substr(0, this->mResource.find_last_of('/') + 1);
 	std::vector<std::map<std::string, std::string> >::iterator itvec = config.getConfLocations().begin();
 	for (; itvec != config.getConfLocations().end(); itvec++)
 	{
-		// if ((*itvec)["location"].size() > resLength && !(*itvec)["location"].compare(0, (*itvec)["location"].size(), tempResourceDir))
 		if ((*itvec)["location"].size() > resLength && tempResourceDir.substr(0, (*itvec)["location"].size()) == (*itvec)["location"])
 		{
 			resLength = (*itvec)["location"].size();
@@ -152,8 +136,6 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig &config)
 		}
 		i++;
 	}
-	// std::cout << "this->mLocNb " << this->mLocNb << std::endl;
-	// std::cout << "reslen " << resLength << std::endl;
 	if (this->mLocNb == static_cast<long unsigned int>(-1))
 		throw std::logic_error("404 Not Found");
 	if (config.getConfLocations()[this->mLocNb]["allowed_methods"].find(this->mReqType) == std::string::npos)
@@ -220,17 +202,17 @@ std::string	httpRequest::getQuery(void) const
 	return (this->mQuery);
 }
 
-bool		httpRequest::getDirListing(void) const
+bool	httpRequest::getDirListing(void) const
 {
 	return (this->mDirListing);
 }
 
-bool		httpRequest::getRedirect(void) const
+bool	httpRequest::getRedirect(void) const
 {
 	return (this->mRedirect);
 }
 
-size_t		httpRequest::getLocNb(void) const
+size_t	httpRequest::getLocNb(void) const
 {
 	return (this->mLocNb);
 }

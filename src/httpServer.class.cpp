@@ -13,7 +13,6 @@
 #include "httpServer.class.hpp"
 #include "httpConfig.class.hpp"
 
-// Constructor with valid path
 httpServer::httpServer(httpConfig *config)
 {
 	if (DEBUG > 2)
@@ -43,6 +42,10 @@ httpServer::~httpServer(void)
 	this->closeSocket();
 }
 
+/**
+ * @brief opens and binds socket
+ * 
+ */
 void httpServer::openSocket(void)
 {
 	if (DEBUG > 2)
@@ -58,6 +61,10 @@ void httpServer::openSocket(void)
 	}
 }
 
+/**
+ * @brief closes socket
+ * 
+ */
 void httpServer::closeSocket(void)
 {
     if (DEBUG > 2)
@@ -67,6 +74,10 @@ void httpServer::closeSocket(void)
 		close(this->mSocket);
 }
 
+/**
+ * @brief listens to socket
+ * 
+ */
 void	httpServer::listenSocket(void)
 {
 	if (DEBUG > 2)
@@ -80,6 +91,9 @@ void	httpServer::listenSocket(void)
 	this->announce();
 }
 
+/**
+ * @brief receives incomming message on socket 
+ */
 int	httpServer::receive(void)
 {
     if (DEBUG > 2)
@@ -136,6 +150,9 @@ int	httpServer::receive(void)
 	return (tmpfd);
 }
 
+/**
+ * @brief handles file upload
+ */
 void	httpServer::fileUpload(int fd)
 {
 	std::map<std::string, std::string>	tmpRequest = this->mRequest[fd]->getRequest();
@@ -150,40 +167,22 @@ void	httpServer::fileUpload(int fd)
 	std::fstream						file;
 	std::string							path;
 	
-	// std::cout << "bound " << boundary << std::endl;
-	// std::cout << "pay " << tmpPayload << std::endl;
-
 	while (payloadPos != std::string::npos)
 	{
 		payloadPos = tmpPayload.find(boundary, payloadPos + boundary.size());
 		nbChunks++;
 	}
 
-	// std::cout << "Chunks " << nbChunks << std::endl;
 	payloadPos = tmpPayload.find(boundary);
 	while (nbChunks >= 0)
 	{
-		/*
-		finde erste boundary -> suchindex hinter boundary
-		finde content disposition an pos 0 und finde filename="
-		speichere filename ab (optional bis dahin kein \r\n)
-		suchindex hinter \r\n\r\n
-		finde nächste boundary und substr von suchindex bis boundary - 1
-		wenn letzte boundary nicht auf -- endet -> error
-		*/
-		// std::cout << "find bound true" << std::endl;
 		payloadPos = payloadPos + boundary.size() + 2;
 		if (tmpPayload.find("Content-Disposition") == payloadPos)
 		{
 			lineEnd = tmpPayload.find("\r\n", payloadPos);
-			// std::cout << "ppos " << tmpPayload.find("filename=", payloadPos) << std::endl;
 			if ((payloadPos = tmpPayload.find("filename=", payloadPos)) < lineEnd)
 			{
 				fileName = tmpPayload.substr(payloadPos + 10, tmpPayload.find("\"", payloadPos + 10) - payloadPos - 10);
-
-				// std::cout << "filename " << fileName << std::endl;
-				// std::cout << "payload pos " << payloadPos << std::endl;
-				// std::cout << "line end " << lineEnd << std::endl;
 				std::cout << this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"] << std::endl;
 				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"])).append(fileName);
 				file.open(path.c_str(), std::fstream::out | std::fstream::trunc);
@@ -191,24 +190,14 @@ void	httpServer::fileUpload(int fd)
 					throw std::logic_error("404 Not Found");
 				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
 				content = tmpPayload.substr(payloadPos, tmpPayload.find(boundary, payloadPos) - payloadPos - 2);
-				// std::cout << "RALF" << content << "RALF" << std::endl;
 				file.write(&content[0], content.size());
 				file.close();
 			}
 			else
 				payloadPos = tmpPayload.find("\r\n\r\n") + 4;
 		}
-		// else if (tmpPayload.find("--") == payloadPos)
-		// {
-		// 	// std::cout << "transmission end" << std::endl;
-		// 	break ;
-		// }
 		payloadPos = tmpPayload.find(boundary, payloadPos);
-		// std::cout << "payload " << std::endl;
 		nbChunks--;
-		// std::cout << "contlen " << length << std::endl;
-		// std::cout << "lenpayl " << tmpPayload.size() << std::endl;
-		// std::cout << "maxlen " << tmpPayload.max_size() << std::endl;
 		if (length == tmpPayload.size())
 			throw std::logic_error("201 Created");
 		else
@@ -224,6 +213,10 @@ std::string httpServer::IntToString(size_t a)
     return temp.str();
 }
 
+/**
+ * @brief creates response including header to incoming request
+
+ */
 void	httpServer::generateResponse(int fd, size_t fileSize)
 {
 	if (DEBUG > 2)
@@ -266,6 +259,11 @@ void	httpServer::generateResponse(int fd, size_t fileSize)
 	this->mResponse.append("\r\nConnection: close\r\n\r\n");
 }
 
+/**
+ * @brief sends response 
+ * 
+ * @param fd 
+ */
 void	httpServer::answer(int fd)
 {
 	std::ifstream 	ifile;
@@ -371,6 +369,9 @@ void	httpServer::answer(int fd)
 	// delete this->mRequest;
 }
 
+/**
+ * @brief sends error response
+ */
 void	httpServer::answer(int fd, std::string file)
 {
 	if (DEBUG > 2)
@@ -401,6 +402,12 @@ void	httpServer::answer(int fd, std::string file)
 	this->mRespCode = "200 OK";
 }
 
+/**
+ * @brief maps errors to error html pages
+ * 
+ * @param fd 
+ * @param error 
+ */
 void	httpServer::errorHandler(int fd, std::string error)
 {
 	if (DEBUG > 2)
@@ -447,6 +454,10 @@ void	httpServer::errorHandler(int fd, std::string error)
 	}
 }
 
+/**
+ * @brief outputs server names and ports to standard output
+ * 
+ */
 void	httpServer::announce(void) const
 {
 	std::cout << C_GREEN << "Server" << C_GREY << " ( " << this->mConfig->getHost() << ":";
@@ -473,14 +484,7 @@ char **httpServer::setEnv(int fd, std::string queryString)
 		char **args = new char*[3];
 
 		args[0] = strdup(execution.c_str());
-		// args[1] = strdup("/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
 		args[1] = strdup(this->mRequest[fd]->getResource().c_str());
-		// args[2] = strdup("PFA=foobar");
-		// args[3] = strdup("PFA2=boofar");
-		// args[0] = strdup("REQUEST_METHOD=POST");
-		// args[1] = strdup("QUERY_STRING=PFA=foobar");
-		// args[2] = strdup("PATH_INFO=/phptest/test.php");
-		// args[3] = strdup("PATH_TRANSLATED=/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
 		args[2] = NULL;
 		return (args);
 	}
@@ -494,14 +498,15 @@ char **httpServer::setEnv(int fd, std::string queryString)
 			envp[1] = strdup(("QUERY_STRING=" + this->mRequest[fd]->getQuery()).c_str());
 		envp[2] = strdup(("PATH_INFO=" + this->mRequest[fd]->getResource()).c_str());
 		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest[fd]->getResource()).c_str());
-		// envp[3] = strdup("CONTENT_LENGTH=7");
 		envp[4] = NULL;
 		return (envp);	
 	}
-	//explode querystring '&'
 	return (NULL);
 }
 
+/**
+ * @brief enables directory listing on server
+ */
 void httpServer::handleDirListing(int fd)
 {
 	std::ifstream 	ifile;
@@ -528,7 +533,6 @@ void httpServer::handleDirListing(int fd)
 	}
 	closedir (dir);
 	} else {
-		/* could not open directory */
 		throw std::logic_error("404 Not Found");
 	}
 	fileContent.append("</table></body></html>");
@@ -537,6 +541,9 @@ void httpServer::handleDirListing(int fd)
 	this->mResponse.append(fileContent);
 }
 
+/**
+ * @brief enables execution of executable files in php or python or perl
+ */
 std::string httpServer::handleCGI(int fd)
 {
 	std::string 	tmpFile;
@@ -548,12 +555,11 @@ std::string httpServer::handleCGI(int fd)
 	pid_t pid = -1;
 	tmpFile = "/tmp/" + this->mRequest[fd]->getFileName();
 	tmpFile.append(ft_itoa(nb));
-	// ifile.close();
 	int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
 	pid = fork();
 	int status = 0;
 	this->mEnv = setEnv(fd, "");
-	char **args = setEnv(fd, this->mRequest[fd]->getFileExt()); // this->mRequest[fd]->getQuery()
+	char **args = setEnv(fd, this->mRequest[fd]->getFileExt()); 
 	try
 	{
 		if (pid == -1)
