@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/24 17:15:59 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 14:54:30 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 16:22:21 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define C_MAGENTA "\033[35m"
 # define C_WHITE "\033[37m"
 #ifndef DEBUG
-#define DEBUG 3
+#define DEBUG 0
 #endif
 #include <iostream>
 #include <sstream>

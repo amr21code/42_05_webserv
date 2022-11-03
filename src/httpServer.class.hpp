@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 15:43:21 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 17:59:50 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class httpServer
 		void			listenSocket(void);
 		void			announce(void) const;
 		int				getSocket(void);
-		void			receive(int fd);
+		int			receive(int fd);
 		void			answer(int fd);
 		void			answer(int fd, std::string file);
 		void			errorHandler(int fd, std::string error);
@@ -40,7 +40,7 @@ class httpServer
 		void			eraseMsg(int fd);
 		bool			generateRequest(int fd);
 		int				acceptSocket(void);
-
+		bool			readyToWrite(int fd);
 
 
 	private:
