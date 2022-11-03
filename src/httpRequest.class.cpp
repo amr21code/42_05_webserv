@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 17:43:41 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 10:30:22 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ httpRequest::httpRequest(std::string errorFile, httpConfig &config, int flag)
 	if (DEBUG > 2)
 		std::cout << "httpRequest constructor for errors" << std::endl;
 	this->mError = true;
+	this->mDirListing = false;
+	this->mRedirect = false;
 	this->mResource = config.getConfigMap()["error_page"];
 	this->mResource.append(errorFile);
 }

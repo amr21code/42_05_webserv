@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 17:42:34 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 11:22:45 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,9 @@ int	main(int argc, char **argv)
 	{
 		try
 		{
-			// epevent.data.u32 = i;
-			// epevent.data.u64 = 42;
-			// epevent.data.ptr = NULL;
+			epevent.data.u32 = i;
+			epevent.data.u64 = 42;
+			epevent.data.ptr = NULL;
 			confVector.push_back(new httpConfig(configPath, i + 1));
 			serverVector.push_back(new httpServer(confVector[i]));
 			epevent.data.fd = serverVector[i]->getSocket();
@@ -136,56 +136,63 @@ int	main(int argc, char **argv)
 	while (!gShutdown)
 	{
 		event_count = epoll_wait(epfd, epevents, 64, 1000);
-		std::cout << event_count << std::endl;
+		// std::cout << event_count << std::endl;
 		try
 		{
 			if (event_count < 0 && !gShutdown)
 				throw std::logic_error("Error: epoll_wait() failed");
-			std::cout << epevent.events << std::endl;
+			// std::cout << epevent.events << std::endl;
 			if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
 			{
 				for(int i = 0; i < event_count; i++)
 				{
-					std::cout<< "servers " << countServers << std::endl;
-					std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
+					// std::cout<< "servers " << countServers << std::endl;
+					// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
 					{
-						std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
+						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
 						if (serverVector[j]->getSocket() == epevents[i].data.fd)
 						{
+							std::cout << "TEST1" << std::endl;
 							if (epevents[i].events == EPOLLIN)
 							{
 								tmpfd = serverVector[j]->receive();
-								std::cout<< "tmpfd " << tmpfd << std::endl;
+								// std::cout<< "tmpfd " << tmpfd << std::endl;
 								epevent.data.fd = tmpfd;
 								if (epoll_ctl(epfd, EPOLL_CTL_ADD, tmpfd, &epevent))
 									throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
+								// goto new_event;
 							}
 						}
-						else
+						else if (serverVector[j]->getMsg().size())
 						{
+							std::cout << "TEST2" << std::endl;
 							for (std::map<int, std::string>::iterator itmsg = serverVector[j]->getMsg().begin(); itmsg != serverVector[j]->getMsg().end(); itmsg++)
 							{
-								std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
 								{
-								std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+								// std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 									if (epevents[i].events == EPOLLOUT)
 									{
-										std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+										// std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										//wenn  epevents[i].data.fd == msgfd aus vector -> index an answer
 										serverVector[j]->answer(epevents[i].data.fd);
-										std::cout<< "4 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+										// std::cout<< "4 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
 											throw std::logic_error("Error: Failed to delete file descriptor to epoll");
 										close(epevents[i].data.fd);
-										std::cout << "fd closed " << epevents[i].data.fd << std::endl;
-										serverVector[j]->getMsg().erase(epevents[i].data.fd);
+										// std::cout << "fd closed " << epevents[i].data.fd << std::endl;
+										serverVector[j]->eraseMsg(epevents[i].data.fd);
+										// goto new_event;
+										// break;
 									}
 								}
 							}
 						}
 					}
+				// new_event:
+					std::cout << "endloop " << i <<std::endl;
 				}
 			}
 		}

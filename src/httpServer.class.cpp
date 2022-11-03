@@ -118,10 +118,10 @@ int	httpServer::receive(void)
 
 void	httpServer::fileUpload(void)
 {
-	std::map<std::string, std::string>	tmpRequest = this->mRequest->getRequest();
+	std::map<std::string, std::string>	tmpRequest = this->mRequest.getRequest();
 	size_t		 						length = atoi(tmpRequest["Content-Length"].c_str());
 	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("=")+1);
-	std::string							tmpPayload = this->mRequest->getPayload();
+	std::string							tmpPayload = this->mRequest.getPayload();
 	size_t								payloadPos = 0;
 	int									nbChunks = -1;
 	size_t								lineEnd = 0;
@@ -164,8 +164,8 @@ void	httpServer::fileUpload(void)
 				// std::cout << "filename " << fileName << std::endl;
 				// std::cout << "payload pos " << payloadPos << std::endl;
 				// std::cout << "line end " << lineEnd << std::endl;
-				std::cout << this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["upload"] << std::endl;
-				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest->getLocNb()]["upload"])).append(fileName);
+				std::cout << this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["upload"] << std::endl;
+				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["upload"])).append(fileName);
 				file.open(path.c_str(), std::fstream::out | std::fstream::trunc);
 				if (!file.good())
 					throw std::logic_error("404 Not Found");
@@ -216,23 +216,23 @@ void	httpServer::generateResponse(size_t fileSize)
 	struct stat			fileStats;
 	timespec			modTime;
 
-	if (stat(this->mRequest->getResource().c_str(), &fileStats) == 0)
+	if (stat(this->mRequest.getResource().c_str(), &fileStats) == 0)
 		modTime = fileStats.st_mtim;
-	ifile.open(this->mRequest->getResource().c_str());
+	ifile.open(this->mRequest.getResource().c_str());
 	strftime(buf.data(), this->mcConfBufSize, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	this->mResponse = "HTTP/1.1 ";
 	this->mResponse.append(this->mRespCode);
-	if (this->mRequest->getRedirect())
+	if (this->mRequest.getRedirect())
 	{
 		this->mResponse.append("\r\nLocation: ");
-		this->mResponse.append(this->mRequest->getResource());
+		this->mResponse.append(this->mRequest.getResource());
 	}
 	this->mResponse.append("\r\nDate: ");
 	this->mResponse.append(buf.data());
 	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)");
 	if (fileSize > 0)
 	{
-		if (!this->mRequest->getDirListing())
+		if (!this->mRequest.getDirListing())
 		{
 			this->mResponse.append("\r\nLast-Modified: ");
 			buf.assign(this->mcConfBufSize + 1, '\0');
@@ -259,8 +259,8 @@ void	httpServer::answer(int fd)
 	{
 		try
 		{
-			this->mRequest = new httpRequest(this->mMsg[fd], *this->mConfig);
-			if (this->mRequest->getReqType() == "POST" && !this->mRequest->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
+			this->mRequest = httpRequest(this->mMsg[fd], *this->mConfig);
+			if (this->mRequest.getReqType() == "POST" && !this->mRequest.getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
 				this->fileUpload();
 		}
 		catch(const std::exception& e)
@@ -272,12 +272,12 @@ void	httpServer::answer(int fd)
 	{
 		this->errorHandler(fd, "400 Bad Request");
 	} 
-	if (this->mRequest->getRedirect())
+	if (this->mRequest.getRedirect())
 	{
 		this->mRespCode = "301 Moved Permanently";
 		this->generateResponse(0);
 	}
-	else if (this->mRequest->getDirListing() && this->mRequest->getReqType() == "GET")
+	else if (this->mRequest.getDirListing() && this->mRequest.getReqType() == "GET")
 	{
 		try 
 		{
@@ -288,9 +288,9 @@ void	httpServer::answer(int fd)
 			throw e;
 		}
 	}
-	else if (this->mRequest->getReqType() == "GET" || this->mRequest->getReqType() == "POST")
+	else if (this->mRequest.getReqType() == "GET" || this->mRequest.getReqType() == "POST")
 	{
-		ifile.open(this->mRequest->getResource().c_str());
+		ifile.open(this->mRequest.getResource().c_str());
 		try
 		{
 			if (!ifile.good())
@@ -301,12 +301,12 @@ void	httpServer::answer(int fd)
 			this->errorHandler(fd, e.what());
 			return ;
 		}
-		if (!this->mRequest->getFileExt().compare("php") || !this->mRequest->getFileExt().compare("py") || !this->mRequest->getFileExt().compare("pl"))
+		if (!this->mRequest.getFileExt().compare("php") || !this->mRequest.getFileExt().compare("py") || !this->mRequest.getFileExt().compare("pl"))
 		{
 			tmpFile = handleCGI(fd);
 			ifile.close();
 			ifile.open(tmpFile.c_str());
-			if (!this->mRequest->getFileExt().compare("php"))
+			if (!this->mRequest.getFileExt().compare("php"))
 				getline(ifile, tmp);
 		}
 		while (getline(ifile, tmp))
@@ -320,15 +320,15 @@ void	httpServer::answer(int fd)
 		this->generateResponse(fileContent.size());
 		this->mResponse.append(fileContent);
 	}
-	else if (this->mRequest->getReqType() == "DELETE")
+	else if (this->mRequest.getReqType() == "DELETE")
 	{
-		ifile.open(this->mRequest->getResource().c_str());
+		ifile.open(this->mRequest.getResource().c_str());
 		try
 		{
 			if (!ifile.good())
 				throw std::logic_error("404 Not Found");
 			ifile.close();
-			remove(this->mRequest->getResource().c_str());
+			remove(this->mRequest.getResource().c_str());
 		}
 		catch(const std::logic_error& e)
 		{
@@ -340,9 +340,11 @@ void	httpServer::answer(int fd)
 	}
 	else
 		throw std::logic_error("405 Method Not Allowed");
+	std::cout << "before send" << std::endl;
 	send(fd, this->mResponse.c_str(), this->mResponse.size(), 0);
+	std::cout << "after send" << std::endl;
 	// if send fails -> remove msgfd from epoll
-	delete this->mRequest;
+	// delete this->mRequest;
 }
 
 void	httpServer::answer(int fd, std::string file)
@@ -352,13 +354,13 @@ void	httpServer::answer(int fd, std::string file)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
-	this->mRequest = new httpRequest(file, *this->mConfig, 1);
-	ifile.open(this->mRequest->getResource().c_str());
+	this->mRequest = httpRequest(file, *this->mConfig, 1);
+	ifile.open(this->mRequest.getResource().c_str());
 	if (!ifile.good())
 	{
 		ifile.close();
-		this->mRequest->setResource(this->mConfig->getDefaultMap()["error_page"], file);
-		ifile.open(this->mRequest->getResource().c_str());
+		this->mRequest.setResource(this->mConfig->getDefaultMap()["error_page"], file);
+		ifile.open(this->mRequest.getResource().c_str());
 	}
 	while (getline(ifile, tmp))
 	{
@@ -370,7 +372,7 @@ void	httpServer::answer(int fd, std::string file)
 	// std::cout << this->mResponse << std::endl;
 	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
 	// flag MSG_DONTWAIT statt 0 und nach EAGAIN/EWOULDBLOCK abfragen
-	if (send(fd, this->mResponse.c_str(), this->mResponse.size(), 0) <= 0)
+	send(fd, this->mResponse.c_str(), this->mResponse.size(), 0);
 	// close(this->mMsgFD);
 	this->mRespCode = "200 OK";
 }
@@ -448,7 +450,7 @@ char **httpServer::setEnv(std::string queryString)
 
 		args[0] = strdup(execution.c_str());
 		// args[1] = strdup("/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
-		args[1] = strdup(this->mRequest->getResource().c_str());
+		args[1] = strdup(this->mRequest.getResource().c_str());
 		// args[2] = strdup("PFA=foobar");
 		// args[3] = strdup("PFA2=boofar");
 		// args[0] = strdup("REQUEST_METHOD=POST");
@@ -461,13 +463,13 @@ char **httpServer::setEnv(std::string queryString)
 	else
 	{
 		char **envp = new char*[5]();
-		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest->getReqType()).c_str());
-		if (this->mRequest->getReqType() == "POST")
-			envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getPayload()).c_str());
+		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest.getReqType()).c_str());
+		if (this->mRequest.getReqType() == "POST")
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest.getPayload()).c_str());
 		else
-			envp[1] = strdup(("QUERY_STRING=" + this->mRequest->getQuery()).c_str());
-		envp[2] = strdup(("PATH_INFO=" + this->mRequest->getResource()).c_str());
-		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest->getResource()).c_str());
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest.getQuery()).c_str());
+		envp[2] = strdup(("PATH_INFO=" + this->mRequest.getResource()).c_str());
+		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest.getResource()).c_str());
 		// envp[3] = strdup("CONTENT_LENGTH=7");
 		envp[4] = NULL;
 		return (envp);	
@@ -489,7 +491,7 @@ void httpServer::handleDirListing(void)
 		fileContent.append("\r\n");
 	}
 	ifile.close();
-	std::string path = this->mRequest->getResource();
+	std::string path = this->mRequest.getResource();
 	DIR *dir;
 	struct dirent *ent;
 	std::string content;
@@ -520,14 +522,14 @@ std::string httpServer::handleCGI(int fd)
 	srand(time(NULL));
 	int	nb = rand();
 	pid_t pid = -1;
-	tmpFile = "/tmp/" + this->mRequest->getFileName();
+	tmpFile = "/tmp/" + this->mRequest.getFileName();
 	tmpFile.append(ft_itoa(nb));
 	// ifile.close();
 	int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
 	pid = fork();
 	int status = 0;
 	this->mEnv = setEnv("");
-	char **args = setEnv(this->mRequest->getFileExt()); // this->mRequest->getQuery()
+	char **args = setEnv(this->mRequest.getFileExt()); // this->mRequest.getQuery()
 	try
 	{
 		if (pid == -1)
@@ -557,7 +559,13 @@ std::string httpServer::handleCGI(int fd)
 	(achtung leaking FDs)
 	*/
 }
-std::map<int, std::string>	httpServer::getMsg(void)
+std::map<int, std::string>	httpServer::getMsg(void) const
 {
 	return (this->mMsg);
+}
+
+void	httpServer::eraseMsg(int fd)
+{
+	if (this->mMsg.erase(fd) != 1)
+		throw std::logic_error("Error: Failed to erase FD/Msg");
 }

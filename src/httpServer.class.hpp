@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/02 17:03:26 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 10:02:54 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ class httpServer
 		void			fileUpload(void);
 		void			handleDirListing(void);
 		std::string		handleCGI(int fd);
-		std::map<int, std::string>	getMsg(void);
+		std::map<int, std::string>	getMsg(void) const;
+		void			eraseMsg(int fd);
 
 
 
@@ -52,7 +53,7 @@ class httpServer
 		struct sockaddr_in			mSockAddr;
 		httpConfig					*mConfig;
 		// request
-		httpRequest					*mRequest;
+		httpRequest					mRequest;
 		std::map<int, std::string>	mMsg;
 		// response
 		std::string					mResponse;
