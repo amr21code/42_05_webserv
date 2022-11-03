@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 11:22:45 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/03 13:45:37 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ int	main(int argc, char **argv)
 	while (!gShutdown)
 	{
 		event_count = epoll_wait(epfd, epevents, 64, 1000);
-		// std::cout << event_count << std::endl;
+		std::cout << event_count << std::endl;
 		try
 		{
 			if (event_count < 0 && !gShutdown)
@@ -146,6 +146,7 @@ int	main(int argc, char **argv)
 			{
 				for(int i = 0; i < event_count; i++)
 				{
+					// std::cout << "i " << i << " ev cnt " << event_count << std::endl;
 					// std::cout<< "servers " << countServers << std::endl;
 					// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
@@ -158,16 +159,20 @@ int	main(int argc, char **argv)
 							{
 								tmpfd = serverVector[j]->receive();
 								// std::cout<< "tmpfd " << tmpfd << std::endl;
-								epevent.data.fd = tmpfd;
-								if (epoll_ctl(epfd, EPOLL_CTL_ADD, tmpfd, &epevent))
-									throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
+								if (tmpfd > 2)
+								{
+									epevent.data.fd = tmpfd;
+									if (epoll_ctl(epfd, EPOLL_CTL_ADD, tmpfd, &epevent))
+										throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
+								}
 								// goto new_event;
 							}
 						}
-						else if (serverVector[j]->getMsg().size())
+						else if (serverVector[j]->getMsg().size() > 13)
 						{
-							std::cout << "TEST2" << std::endl;
-							for (std::map<int, std::string>::iterator itmsg = serverVector[j]->getMsg().begin(); itmsg != serverVector[j]->getMsg().end(); itmsg++)
+							// std::cout << "TEST2" << std::endl;
+							std::map<int, std::string> tmpMap = serverVector[j]->getMsg();
+							for (std::map<int, std::string>::iterator itmsg = tmpMap.begin(); itmsg != tmpMap.end(); itmsg++)
 							{
 								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
@@ -175,14 +180,18 @@ int	main(int argc, char **argv)
 								// std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 									if (epevents[i].events == EPOLLOUT)
 									{
+										if (serverVector[j]->generateRequest(itmsg->first))
+											break ;
+										//wenn server->request->content length > msg.size -> break;
+
 										// std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										//wenn  epevents[i].data.fd == msgfd aus vector -> index an answer
 										serverVector[j]->answer(epevents[i].data.fd);
 										// std::cout<< "4 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
 											throw std::logic_error("Error: Failed to delete file descriptor to epoll");
-										close(epevents[i].data.fd);
-										// std::cout << "fd closed " << epevents[i].data.fd << std::endl;
+										if (!close(epevents[i].data.fd))
+											std::cout << "fd closed " << epevents[i].data.fd << std::endl;
 										serverVector[j]->eraseMsg(epevents[i].data.fd);
 										// goto new_event;
 										// break;
@@ -190,9 +199,11 @@ int	main(int argc, char **argv)
 								}
 							}
 						}
+						else
+						{
+							//! error weil message zu kurz?
+						}
 					}
-				// new_event:
-					std::cout << "endloop " << i <<std::endl;
 				}
 			}
 		}

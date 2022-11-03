@@ -98,30 +98,50 @@ int	httpServer::receive(void)
 		return (-1);
 	}
 	tmpmsg = "";
-	while (tmpmsg.size() == 0)
-	{
-		while ((recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT)) > 0)
-		{
+	// while (tmpmsg.size() == 0)
+	// {
+		// usleep(100);
+			// recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
+		// while (recv_return > 0)
+		// {
+			recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
+			if (!recv_return)
+			{
+				std::cerr << "Error: client closed connection" << recv_return << std::endl;
+				close(tmpfd);
+				return (-1);
+			}
+			else if (recv_return < 0)
+			{
+				std::cerr << "Error: recv() failed" << recv_return << std::endl;
+				close(tmpfd);
+				return (-1);
+			}
 			if (DEBUG > 2)
 				std::cout << "httpServer received something" << std::endl;
-			if (tmpmsg.size() == 0)
-				tmpmsg = buffer.data();
+			if (this->mMsg[tmpfd].size() == 0)
+				this->mMsg[tmpfd] = tmpmsg;
 			else
-				tmpmsg.append(buffer.data(), recv_return); 
-			buffer.assign(this->mcConfBufSize + 1, '\0');
-			usleep(100);
-		}
-	}
-	this->mMsg[tmpfd] = tmpmsg;
+				this->mMsg[tmpfd].append(tmpmsg);
+			// if (tmpmsg.size() == 0)
+			// 	tmpmsg = buffer.data();
+			// else
+			// 	tmpmsg.append(buffer.data(), recv_return); 
+			// buffer.assign(this->mcConfBufSize + 1, '\0');
+			// usleep(100);
+			// recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
+	// 	}
+	// }
+	// this->mMsg[tmpfd] = tmpmsg;
 	return (tmpfd);
 }
 
-void	httpServer::fileUpload(void)
+void	httpServer::fileUpload(int fd)
 {
-	std::map<std::string, std::string>	tmpRequest = this->mRequest.getRequest();
+	std::map<std::string, std::string>	tmpRequest = this->mRequest[fd]->getRequest();
 	size_t		 						length = atoi(tmpRequest["Content-Length"].c_str());
 	std::string 						boundary = tmpRequest["Content-Type"].substr(tmpRequest["Content-Type"].find("=")+1);
-	std::string							tmpPayload = this->mRequest.getPayload();
+	std::string							tmpPayload = this->mRequest[fd]->getPayload();
 	size_t								payloadPos = 0;
 	int									nbChunks = -1;
 	size_t								lineEnd = 0;
@@ -164,8 +184,8 @@ void	httpServer::fileUpload(void)
 				// std::cout << "filename " << fileName << std::endl;
 				// std::cout << "payload pos " << payloadPos << std::endl;
 				// std::cout << "line end " << lineEnd << std::endl;
-				std::cout << this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["upload"] << std::endl;
-				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest.getLocNb()]["upload"])).append(fileName);
+				std::cout << this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"] << std::endl;
+				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"])).append(fileName);
 				file.open(path.c_str(), std::fstream::out | std::fstream::trunc);
 				if (!file.good())
 					throw std::logic_error("404 Not Found");
@@ -204,7 +224,7 @@ std::string httpServer::IntToString(size_t a)
     return temp.str();
 }
 
-void	httpServer::generateResponse(size_t fileSize)
+void	httpServer::generateResponse(int fd, size_t fileSize)
 {
 	if (DEBUG > 2)
 		std::cout << "httpServer generateResponse" << std::endl;
@@ -216,23 +236,23 @@ void	httpServer::generateResponse(size_t fileSize)
 	struct stat			fileStats;
 	timespec			modTime;
 
-	if (stat(this->mRequest.getResource().c_str(), &fileStats) == 0)
+	if (stat(this->mRequest[fd]->getResource().c_str(), &fileStats) == 0)
 		modTime = fileStats.st_mtim;
-	ifile.open(this->mRequest.getResource().c_str());
+	ifile.open(this->mRequest[fd]->getResource().c_str());
 	strftime(buf.data(), this->mcConfBufSize, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	this->mResponse = "HTTP/1.1 ";
 	this->mResponse.append(this->mRespCode);
-	if (this->mRequest.getRedirect())
+	if (this->mRequest[fd]->getRedirect())
 	{
 		this->mResponse.append("\r\nLocation: ");
-		this->mResponse.append(this->mRequest.getResource());
+		this->mResponse.append(this->mRequest[fd]->getResource());
 	}
 	this->mResponse.append("\r\nDate: ");
 	this->mResponse.append(buf.data());
 	this->mResponse.append("\r\nServer: WebSurfer/0.1.2 (Linux)");
 	if (fileSize > 0)
 	{
-		if (!this->mRequest.getDirListing())
+		if (!this->mRequest[fd]->getDirListing())
 		{
 			this->mResponse.append("\r\nLast-Modified: ");
 			buf.assign(this->mcConfBufSize + 1, '\0');
@@ -259,9 +279,9 @@ void	httpServer::answer(int fd)
 	{
 		try
 		{
-			this->mRequest = httpRequest(this->mMsg[fd], *this->mConfig);
-			if (this->mRequest.getReqType() == "POST" && !this->mRequest.getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
-				this->fileUpload();
+			// this->mRequest[fd] = new httpRequest(this->mMsg[fd], *this->mConfig);
+			if (this->mRequest[fd]->getReqType() == "POST" && !this->mRequest[fd]->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
+				this->fileUpload(fd);
 		}
 		catch(const std::exception& e)
 		{
@@ -272,25 +292,26 @@ void	httpServer::answer(int fd)
 	{
 		this->errorHandler(fd, "400 Bad Request");
 	} 
-	if (this->mRequest.getRedirect())
+	if (this->mRequest[fd]->getRedirect())
 	{
 		this->mRespCode = "301 Moved Permanently";
-		this->generateResponse(0);
+		this->generateResponse(fd, 0);
 	}
-	else if (this->mRequest.getDirListing() && this->mRequest.getReqType() == "GET")
+	else if (this->mRequest[fd]->getDirListing() && this->mRequest[fd]->getReqType() == "GET")
 	{
 		try 
 		{
-			handleDirListing();
+			handleDirListing(fd);
 		}
 		catch(const std::logic_error &e)
 		{
-			throw e;
+			this->errorHandler(fd, e.what());
+			return ;
 		}
 	}
-	else if (this->mRequest.getReqType() == "GET" || this->mRequest.getReqType() == "POST")
+	else if (this->mRequest[fd]->getReqType() == "GET" || this->mRequest[fd]->getReqType() == "POST")
 	{
-		ifile.open(this->mRequest.getResource().c_str());
+		ifile.open(this->mRequest[fd]->getResource().c_str());
 		try
 		{
 			if (!ifile.good())
@@ -301,12 +322,12 @@ void	httpServer::answer(int fd)
 			this->errorHandler(fd, e.what());
 			return ;
 		}
-		if (!this->mRequest.getFileExt().compare("php") || !this->mRequest.getFileExt().compare("py") || !this->mRequest.getFileExt().compare("pl"))
+		if (!this->mRequest[fd]->getFileExt().compare("php") || !this->mRequest[fd]->getFileExt().compare("py") || !this->mRequest[fd]->getFileExt().compare("pl"))
 		{
 			tmpFile = handleCGI(fd);
 			ifile.close();
 			ifile.open(tmpFile.c_str());
-			if (!this->mRequest.getFileExt().compare("php"))
+			if (!this->mRequest[fd]->getFileExt().compare("php"))
 				getline(ifile, tmp);
 		}
 		while (getline(ifile, tmp))
@@ -317,32 +338,35 @@ void	httpServer::answer(int fd)
 		ifile.close();
 		if (tmpFile.size() > 0)
 			remove(tmpFile.c_str());
-		this->generateResponse(fileContent.size());
+		this->generateResponse(fd, fileContent.size());
 		this->mResponse.append(fileContent);
 	}
-	else if (this->mRequest.getReqType() == "DELETE")
+	else if (this->mRequest[fd]->getReqType() == "DELETE")
 	{
-		ifile.open(this->mRequest.getResource().c_str());
+		ifile.open(this->mRequest[fd]->getResource().c_str());
 		try
 		{
 			if (!ifile.good())
 				throw std::logic_error("404 Not Found");
 			ifile.close();
-			remove(this->mRequest.getResource().c_str());
+			remove(this->mRequest[fd]->getResource().c_str());
 		}
 		catch(const std::logic_error& e)
 		{
 			this->errorHandler(fd, e.what());
 			return ;
 		}
-		this->generateResponse(fileContent.size());
+		this->generateResponse(fd, fileContent.size());
 		this->mResponse.append(fileContent);
 	}
 	else
-		throw std::logic_error("405 Method Not Allowed");
-	std::cout << "before send" << std::endl;
+	{
+		this->errorHandler(fd, "405 Method Not Allowed");
+		return ;
+	}
+	// std::cout << "before send" << std::endl;
 	send(fd, this->mResponse.c_str(), this->mResponse.size(), 0);
-	std::cout << "after send" << std::endl;
+	// std::cout << "after send" << std::endl;
 	// if send fails -> remove msgfd from epoll
 	// delete this->mRequest;
 }
@@ -354,20 +378,20 @@ void	httpServer::answer(int fd, std::string file)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
-	this->mRequest = httpRequest(file, *this->mConfig, 1);
-	ifile.open(this->mRequest.getResource().c_str());
+	this->mRequest[fd] = new httpRequest(file, *this->mConfig, 1);
+	ifile.open(this->mRequest[fd]->getResource().c_str());
 	if (!ifile.good())
 	{
 		ifile.close();
-		this->mRequest.setResource(this->mConfig->getDefaultMap()["error_page"], file);
-		ifile.open(this->mRequest.getResource().c_str());
+		this->mRequest[fd]->setResource(this->mConfig->getDefaultMap()["error_page"], file);
+		ifile.open(this->mRequest[fd]->getResource().c_str());
 	}
 	while (getline(ifile, tmp))
 	{
 		fileContent.append(tmp);
 		fileContent.append("\r\n");
 	}
-	this->generateResponse(fileContent.size());
+	this->generateResponse(fd, fileContent.size());
 	this->mResponse.append(fileContent);
 	// std::cout << this->mResponse << std::endl;
 	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
@@ -435,7 +459,7 @@ int		httpServer::getSocket(void)
 	return(this->mSocket);
 }
 
-char **httpServer::setEnv(std::string queryString)
+char **httpServer::setEnv(int fd, std::string queryString)
 {
 	if (queryString.size() > 0)
 	{
@@ -450,7 +474,7 @@ char **httpServer::setEnv(std::string queryString)
 
 		args[0] = strdup(execution.c_str());
 		// args[1] = strdup("/home/pi/projects/C05_webserv/42_05_webserv/www/html/phptest/test.php");
-		args[1] = strdup(this->mRequest.getResource().c_str());
+		args[1] = strdup(this->mRequest[fd]->getResource().c_str());
 		// args[2] = strdup("PFA=foobar");
 		// args[3] = strdup("PFA2=boofar");
 		// args[0] = strdup("REQUEST_METHOD=POST");
@@ -463,13 +487,13 @@ char **httpServer::setEnv(std::string queryString)
 	else
 	{
 		char **envp = new char*[5]();
-		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest.getReqType()).c_str());
-		if (this->mRequest.getReqType() == "POST")
-			envp[1] = strdup(("QUERY_STRING=" + this->mRequest.getPayload()).c_str());
+		envp[0] = strdup(("REQUEST_METHOD=" + this->mRequest[fd]->getReqType()).c_str());
+		if (this->mRequest[fd]->getReqType() == "POST")
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest[fd]->getPayload()).c_str());
 		else
-			envp[1] = strdup(("QUERY_STRING=" + this->mRequest.getQuery()).c_str());
-		envp[2] = strdup(("PATH_INFO=" + this->mRequest.getResource()).c_str());
-		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest.getResource()).c_str());
+			envp[1] = strdup(("QUERY_STRING=" + this->mRequest[fd]->getQuery()).c_str());
+		envp[2] = strdup(("PATH_INFO=" + this->mRequest[fd]->getResource()).c_str());
+		envp[3] = strdup(("PATH_TRANSLATED=" + this->mRequest[fd]->getResource()).c_str());
 		// envp[3] = strdup("CONTENT_LENGTH=7");
 		envp[4] = NULL;
 		return (envp);	
@@ -478,7 +502,7 @@ char **httpServer::setEnv(std::string queryString)
 	return (NULL);
 }
 
-void httpServer::handleDirListing(void)
+void httpServer::handleDirListing(int fd)
 {
 	std::ifstream 	ifile;
 	std::string		tmp;
@@ -491,7 +515,7 @@ void httpServer::handleDirListing(void)
 		fileContent.append("\r\n");
 	}
 	ifile.close();
-	std::string path = this->mRequest.getResource();
+	std::string path = this->mRequest[fd]->getResource();
 	DIR *dir;
 	struct dirent *ent;
 	std::string content;
@@ -509,7 +533,7 @@ void httpServer::handleDirListing(void)
 	}
 	fileContent.append("</table></body></html>");
 
-	this->generateResponse(fileContent.size());
+	this->generateResponse(fd, fileContent.size());
 	this->mResponse.append(fileContent);
 }
 
@@ -522,14 +546,14 @@ std::string httpServer::handleCGI(int fd)
 	srand(time(NULL));
 	int	nb = rand();
 	pid_t pid = -1;
-	tmpFile = "/tmp/" + this->mRequest.getFileName();
+	tmpFile = "/tmp/" + this->mRequest[fd]->getFileName();
 	tmpFile.append(ft_itoa(nb));
 	// ifile.close();
 	int tempFd 	= open(tmpFile.c_str(), O_RDWR|O_CREAT, 0644);
 	pid = fork();
 	int status = 0;
-	this->mEnv = setEnv("");
-	char **args = setEnv(this->mRequest.getFileExt()); // this->mRequest.getQuery()
+	this->mEnv = setEnv(fd, "");
+	char **args = setEnv(fd, this->mRequest[fd]->getFileExt()); // this->mRequest[fd]->getQuery()
 	try
 	{
 		if (pid == -1)
@@ -568,4 +592,18 @@ void	httpServer::eraseMsg(int fd)
 {
 	if (this->mMsg.erase(fd) != 1)
 		throw std::logic_error("Error: Failed to erase FD/Msg");
+}
+
+bool	httpServer::generateRequest(int fd)
+{
+	try
+	{
+		this->mRequest[fd] = new httpRequest(this->mMsg[fd], *this->mConfig);
+	}
+	catch(const std::exception& e)
+	{
+		this->errorHandler(fd, e.what());
+		return true;
+	}
+	return false;
 }
