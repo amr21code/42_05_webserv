@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
+/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 18:06:10 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/04 09:29:00 by djedasch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,7 @@ int	main(int argc, char **argv)
 											if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
 												throw std::logic_error("Error: Failed to delete file descriptor to epoll");
 											serverVector[j]->eraseMsg(epevents[i].data.fd);
+											serverVector[j]->eraseRequest(epevents[i].data.fd);
 										}
 										std::cout << "TEST EPOLLIN" << std::endl;
 									}

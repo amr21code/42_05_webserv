@@ -607,6 +607,12 @@ void	httpServer::eraseMsg(int fd)
 		throw std::logic_error("Error: Failed to erase FD/Msg");
 }
 
+void	httpServer::eraseRequest(int fd)
+{
+	if (this->mRequest.erase(fd) != 1)
+		throw std::logic_error("Error: Failed to erase FD/Request");
+}
+
 bool	httpServer::generateRequest(int fd)
 {
 	if (DEBUG > 2)
