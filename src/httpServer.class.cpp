@@ -120,39 +120,21 @@ int	httpServer::receive(int fd)
 	std::vector<char>	buffer(mcConfBufSize + 1, '\0');
 	int					recv_return = 1;
 
-	// tmpfd = accept(this->mSocket, (struct sockaddr *)&this->mSockAddr, (socklen_t *)&addrlen);
-	// if (tmpfd < 0)
-	// {
-	// 	std::cerr << "Error: accept() failed" << std::endl;
-	// 	return (-1);
-	// }
-	// while (tmpmsg.size() == 0)
-	// {
-		// usleep(100);
-			// recv_return = recv(tmpfd, buffer.data(), this->mcConfBufSize, MSG_DONTWAIT);
-		// while (recv_return > 0)
-		// {
 	recv_return = recv(fd, buffer.data(), this->mcConfBufSize, 0);
 	if (!recv_return)
 	{
 		std::cerr << "Error: client closed connection " << recv_return << std::endl;
-		close(fd);
-		return -1;
+		return fd;
 	}
 	else if (recv_return < 0 && (static_cast<std::string>(buffer.data())).size() == 0)
 	{
 		std::cerr << "Error: recv() failed " << recv_return << std::endl;
-		close(fd);
-		return -1;
+		return fd;
 	}
 	if (DEBUG > 2)
 		std::cout << "httpServer received something" << std::endl;
-	// if (this->mMsg[fd].size() == 0)
-	// 	this->mMsg[fd] = buffer.data();
-	// else
 	this->mMsg[fd].append(buffer.data(), recv_return);
 	return (0);
-	// std::cout << "fd " << fd << " msg " << buffer.data() << std::endl;
 }
 
 /**
@@ -188,7 +170,6 @@ void	httpServer::fileUpload(int fd)
 			if ((payloadPos = tmpPayload.find("filename=", payloadPos)) < lineEnd)
 			{
 				fileName = tmpPayload.substr(payloadPos + 10, tmpPayload.find("\"", payloadPos + 10) - payloadPos - 10);
-				// std::cout << this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"] << std::endl;
 				path = ((path.append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["root"])).append(this->mConfig->getConfLocations()[this->mRequest[fd]->getLocNb()]["upload"])).append(fileName);
 				file.open(path.c_str(), std::fstream::out | std::fstream::trunc);
 				if (!file.good())
@@ -367,12 +348,9 @@ void	httpServer::answer(int fd)
 		this->errorHandler(fd, "405 Method Not Allowed");
 		return ;
 	}
-	// std::cout << "before send" << std::endl;
 	if (send(fd, this->mResponse.c_str(), this->mResponse.size(), 0) < 1)
 		std::cerr << "Error: send() failed" << std::endl;
-	// std::cout << "after send" << std::endl;
-	// if send fails -> remove msgfd from epoll
-	// delete this->mRequest;
+	this->mRespCode = "200 OK";
 }
 
 /**
@@ -385,6 +363,9 @@ void	httpServer::answer(int fd, std::string file)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
+	std::cout << "fd " << fd << std::endl;
+	if (this->mRequest.count(fd))
+		delete this->mRequest[fd];
 	this->mRequest[fd] = new httpRequest(file, *this->mConfig, 1);
 	ifile.open(this->mRequest[fd]->getResource().c_str());
 	if (!ifile.good())
@@ -400,12 +381,8 @@ void	httpServer::answer(int fd, std::string file)
 	}
 	this->generateResponse(fd, fileContent.size());
 	this->mResponse.append(fileContent);
-	// std::cout << this->mResponse << std::endl;
-	// möglicherweise gesendete bytes abgleichen mit den zu sendenden und ggf. senden wiederholen
-	// flag MSG_DONTWAIT statt 0 und nach EAGAIN/EWOULDBLOCK abfragen
 	if (send(fd, this->mResponse.c_str(), this->mResponse.size(), 0) < 1)
 		std::cerr << "Error: send() failed" << std::endl;
-	// close(this->mMsgFD);
 	this->mRespCode = "200 OK";
 }
 
@@ -592,9 +569,6 @@ std::string httpServer::handleCGI(int fd)
 		this->errorHandler(fd, e.what());
 	}
 	return (tmpFile);
-	/* 
-	(achtung leaking FDs)
-	*/
 }
 std::map<int, std::string>	httpServer::getMsg(void) const
 {
@@ -605,6 +579,14 @@ void	httpServer::eraseMsg(int fd)
 {
 	if (this->mMsg.erase(fd) != 1)
 		throw std::logic_error("Error: Failed to erase FD/Msg");
+}
+
+void	httpServer::eraseRequest(int fd)
+{
+	if (this->mRequest.count(fd))
+		delete this->mRequest[fd];
+	if (this->mRequest.erase(fd) != 1)
+		throw std::logic_error("Error: Failed to erase FD/Request");
 }
 
 bool	httpServer::generateRequest(int fd)
@@ -627,9 +609,8 @@ bool httpServer::readyToWrite(int fd)
 {
 	if (this->mRequest[fd]->getReqType() == "POST" && atol(this->mRequest[fd]->getRequest()["Content-Length"].c_str()) > static_cast<long>(this->mMsg[fd].size()))
 	{
-		std::cout << "post und size passt nicht " << atol(this->mRequest[fd]->getRequest()["Content-Length"].c_str()) << " <- CL : msg size -> " << static_cast<long>(this->mMsg[fd].size()) << std::endl;
 		return false;
 	}
-	std::cout << "kein post oder size passt " << atol(this->mRequest[fd]->getRequest()["Content-Length"].c_str()) << " <- CL : msg size -> " << static_cast<long>(this->mMsg[fd].size()) << std::endl;
+	delete this->mRequest[fd];
 	return true;
 }

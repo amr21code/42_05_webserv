@@ -1,0 +1,3 @@
+#!/bin/bash
+PATH="127.0.0.1 2004"
+/usr/bin/telnet $PATH

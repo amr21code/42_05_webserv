@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 17:59:50 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/04 13:33:39 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class httpServer
 		bool			generateRequest(int fd);
 		int				acceptSocket(void);
 		bool			readyToWrite(int fd);
-
+		void			eraseRequest(int fd);
 
 	private:
 		//config

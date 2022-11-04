@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 18:11:33 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/04 15:03:47 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,15 +99,15 @@ int	main(int argc, char **argv)
 					std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
 					{
-						std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
-						std::cout <<" message size " << serverVector[j]->getMsg()[epevents[i].data.fd].size() << std::endl;
+						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
+						// std::cout <<" message size " << serverVector[j]->getMsg()[epevents[i].data.fd].size() << std::endl;
 						if (serverVector[j]->getSocket() == epevents[i].data.fd)
 						{
-							std::cout << "ACCEPT SOCKET" << std::endl;
+							// std::cout << "ACCEPT SOCKET" << std::endl;
 							if (epevents[i].events & EPOLLIN)
 							{
 								tmpfd = serverVector[j]->acceptSocket();
-								std::cout<< "tmpfd " << tmpfd << std::endl;
+								// std::cout<< "tmpfd " << tmpfd << std::endl;
 								if (tmpfd > 2)
 								{
 									epevent.data.fd = tmpfd;
@@ -120,11 +120,12 @@ int	main(int argc, char **argv)
 										throw std::logic_error("Error (2): Failed to add file descriptor to epoll");
 									if (serverVector[j]->generateRequest(tmpfd))
 									{
-										if (epoll_ctl(epfd, EPOLL_CTL_DEL, tmpfd, &epevent))
-											throw std::logic_error("Error: Failed to delete file descriptor to epoll");
-										if (!close(tmpfd))
-											std::cout << "fd closed " << tmpfd << std::endl;
 										serverVector[j]->eraseMsg(tmpfd);
+										serverVector[j]->eraseRequest(tmpfd);
+										if (epoll_ctl(epfd, EPOLL_CTL_DEL, tmpfd, &epevent))
+											throw std::logic_error("Error (1): Failed to delete file descriptor to epoll");
+										if (!close(tmpfd) && DEBUG > 2)
+											std::cout << "fd closed " << tmpfd << std::endl;
 									}
 								}
 							}
@@ -144,26 +145,29 @@ int	main(int argc, char **argv)
 									{
 										if (serverVector[j]->receive(epevents[i].data.fd))
 										{
-											if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
-												throw std::logic_error("Error: Failed to delete file descriptor to epoll");
 											serverVector[j]->eraseMsg(epevents[i].data.fd);
+											serverVector[j]->eraseRequest(epevents[i].data.fd);
+											if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
+												throw std::logic_error("Error (2): Failed to delete file descriptor to epoll");
+											close(epevents[i].data.fd);
 										}
 										std::cout << "TEST EPOLLIN" << std::endl;
 									}
 									else if ((epevents[i].events & EPOLLOUT) && serverVector[j]->readyToWrite(epevents[i].data.fd))
 									{
-										std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+										// std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										if (serverVector[j]->generateRequest(tmpfd))
 											std::cerr << "Error: generate Request failed" << std::endl;
 										else
 											serverVector[j]->answer(epevents[i].data.fd);
 										//wenn  epevents[i].data.fd == msgfd aus vector -> index an answer
 										// std::cout<< "4 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
-										if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
-											throw std::logic_error("Error: Failed to delete file descriptor to epoll");
-										if (!close(epevents[i].data.fd))
-											std::cout << "fd closed " << epevents[i].data.fd << std::endl;
+										serverVector[j]->eraseRequest(epevents[i].data.fd);
 										serverVector[j]->eraseMsg(epevents[i].data.fd);
+										if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
+											throw std::logic_error("Error (3): Failed to delete file descriptor to epoll");
+										if (!close(epevents[i].data.fd) && DEBUG > 2)
+											std::cout << "fd closed " << epevents[i].data.fd << std::endl;
 										// goto new_event;
 										// break;
 									}

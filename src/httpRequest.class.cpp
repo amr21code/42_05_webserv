@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpRequest.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djedasch <djedasch@student.42wolfsburg.de> +#+  +:+       +#+        */
+/*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 16:49:53 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 14:37:23 by djedasch         ###   ########.fr       */
+/*   Updated: 2022/11/04 16:00:13 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ httpRequest::httpRequest(std::string msg, httpConfig &config)
 	std::transform(this->mFileExt.begin(), this->mFileExt.end(), this->mFileExt.begin(), ::tolower);
 	int payloadindex = msg.find("\r\n\r\n", 0);
 	this->mPayload = msg.substr(payloadindex + 4);
+	if (this->mPayload.size() > config.getMaxBodySize())
+		throw std::logic_error("413 Request Entity Too Large");
 }
 
 httpRequest::httpRequest(std::string errorFile, httpConfig &config, int flag)
@@ -106,9 +108,7 @@ void httpRequest::firstLineHandler(std::string msg, httpConfig &config)
 	size_t		i = 0;
 
 	this->mLocNb = -1;
-	if (msg.size() > config.getMaxBodySize())
-		throw std::logic_error("413 Request Entity Too Large");
-	else if (msg.size() < 14)
+	if (msg.size() < 14)
 		throw std::logic_error("400 Bad Request");
 	if (msg.find("HTTP/1.1") == msg.npos)
 		throw std::logic_error("505 HTTP Version Not Supported");
