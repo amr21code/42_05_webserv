@@ -1,0 +1,31 @@
+#!/bin/bash
+if [ -z "$1" ]
+then
+	PATH=127.0.0.1:2002/scriptresponse/basic_checks.php
+else
+	PATH=$1
+fi
+
+echo "GET"
+/usr/bin/curl -X GET $PATH
+echo " ";
+echo " ";
+
+echo "POST"
+/usr/bin/curl -X POST -H "Content-Type: plain/text" --data "PFA=123" $PATH
+echo " ";
+echo " ";
+
+echo "DELETE"
+/usr/bin/curl -X DELETE $PATH
+echo " ";
+echo " ";
+
+echo "UNKNOWN"
+/usr/bin/curl -X UNKNOWN $PATH
+
+echo " ";
+echo " ";
+
+echo "asdfasdfasdf"
+/usr/bin/curl -X asdfasdfasdf $PATH

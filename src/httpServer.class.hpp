@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:51:13 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/04 13:33:39 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/05 10:04:57 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,27 +21,27 @@ class httpServer
 	public:
 		httpServer(httpConfig *config);
 		~httpServer(void);
-		void			openSocket(void);
-		void			closeSocket(void);
-		void			listenSocket(void);
-		void			announce(void) const;
-		int				getSocket(void);
-		int			receive(int fd);
-		void			answer(int fd);
-		void			answer(int fd, std::string file);
-		void			errorHandler(int fd, std::string error);
-		void			generateResponse(int fd, size_t fileSize);
-		std::string 	IntToString(size_t a);
-		char 			**setEnv(int fd, std::string queryString);
-		void			fileUpload(int fd);
-		void			handleDirListing(int fd);
-		std::string		handleCGI(int fd);
+		void						openSocket(void);
+		void						closeSocket(void);
+		void						listenSocket(void);
+		void						announce(void) const;
+		int							getSocket(void);
+		int							receive(int fd);
+		void						answer(int fd);
+		void						answer(int fd, std::string file);
+		void						errorHandler(int fd, std::string error);
+		void						generateResponse(int fd, size_t fileSize);
+		std::string 				IntToString(size_t a);
+		char 						**setEnv(int fd, std::string queryString);
+		void						fileUpload(int fd);
+		void						handleDirListing(int fd);
+		std::string					handleCGI(int fd);
 		std::map<int, std::string>	getMsg(void) const;
-		void			eraseMsg(int fd);
-		bool			generateRequest(int fd);
-		int				acceptSocket(void);
-		bool			readyToWrite(int fd);
-		void			eraseRequest(int fd);
+		void						eraseMsg(int fd);
+		bool						generateRequest(int fd);
+		int							acceptSocket(void);
+		bool						readyToWrite(int fd);
+		void						eraseRequest(int fd);
 
 	private:
 		//config

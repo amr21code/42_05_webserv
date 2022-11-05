@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/05 09:18:00 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/05 10:01:28 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,29 +85,21 @@ int	main(int argc, char **argv)
 	while (!gShutdown)
 	{
 		event_count = epoll_wait(epfd, epevents, 200, 1000);
-		// std::cout << event_count << std::endl;
 		try
 		{
 			if (event_count < 0 && !gShutdown)
 				throw std::logic_error("Error: epoll_wait() failed");
-			if (event_count > 0) // && !(errno == EAGAIN || errno == EWOULDBLOCK))
+			if (event_count > 0) 
 			{
 				for(int i = 0; i < event_count; i++)
 				{
-					// std::cout << "i " << i << " ev cnt " << event_count << std::endl;
-					// std::cout<< "servers " << countServers << std::endl;
-					// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
 					{
-						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
-						// std::cout <<" message size " << serverVector[j]->getMsg()[epevents[i].data.fd].size() << std::endl;
 						if (serverVector[j]->getSocket() == epevents[i].data.fd)
 						{
-							// std::cout << "ACCEPT SOCKET" << std::endl;
 							if (epevents[i].events & EPOLLIN)
 							{
 								tmpfd = serverVector[j]->acceptSocket();
-								// std::cout<< "tmpfd " << tmpfd << std::endl;
 								if (tmpfd > 2)
 								{
 									epevent.data.fd = tmpfd;
@@ -133,15 +125,11 @@ int	main(int argc, char **argv)
 						}
 						else
 						{
-							// std::cout << "SEND/RECV TO FD" << std::endl;
 							std::map<int, std::string> tmpMap = serverVector[j]->getMsg();
 							for (std::map<int, std::string>::iterator itmsg = tmpMap.begin(); itmsg != tmpMap.end(); itmsg++)
 							{
-								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
 								{
-									// std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
-									// std::cout << epevents[i].events << std::endl;
 									if (epevents[i].events & EPOLLIN)
 									{
 										if (serverVector[j]->receive(epevents[i].data.fd))
@@ -152,25 +140,19 @@ int	main(int argc, char **argv)
 												throw std::logic_error("Error (2): Failed to delete file descriptor to epoll");
 											close(epevents[i].data.fd);
 										}
-										// std::cout << "TEST EPOLLIN" << std::endl;
 									}
 									else if ((epevents[i].events & EPOLLOUT) && serverVector[j]->readyToWrite(epevents[i].data.fd))
 									{
-										// std::cout<< "3 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										if (serverVector[j]->generateRequest(tmpfd))
 											std::cerr << "Error: generate Request failed" << std::endl;
 										else
 											serverVector[j]->answer(epevents[i].data.fd);
-										//wenn  epevents[i].data.fd == msgfd aus vector -> index an answer
-										// std::cout<< "4 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 										serverVector[j]->eraseRequest(epevents[i].data.fd);
 										serverVector[j]->eraseMsg(epevents[i].data.fd);
 										if (epoll_ctl(epfd, EPOLL_CTL_DEL, epevents[i].data.fd, &epevent))
 											throw std::logic_error("Error (3): Failed to delete file descriptor to epoll");
 										if (!close(epevents[i].data.fd) && DEBUG > 2)
 											std::cout << "fd closed " << epevents[i].data.fd << std::endl;
-										// goto new_event;
-										// break;
 									}
 								}
 							}

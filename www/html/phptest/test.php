@@ -14,8 +14,6 @@ echo "<br>";
 echo $_GET["PFA"];
 echo "<br>";
 
-// print_r($GLOBALS);
-
 ?>
 </body>
 </html>

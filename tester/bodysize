@@ -1,11 +1,11 @@
 #!/bin/bash
 if [ -z "$2" ]
 then
-	PATH=127.0.0.1:2002/phptest/bodysize_response.php
+	PATH=127.0.0.1:2001/scriptresponse/bodysize_response.php
 else
 	PATH=$2
 fi
-if [ -z "$1"]
+if [ -z "$1" ]
 then
 	SIZE=10
 else
