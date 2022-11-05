@@ -18,6 +18,7 @@ httpServer::httpServer(httpConfig *config)
 	if (DEBUG > 2)
 		std::cout << "httpServer constructor with path" <<  std::endl;
 
+	this->mRequest[0];
 	this->mConfig = config;
 	this->mRespCode = "200 OK";
 	this->mSockAddr.sin_family = this->mcConfDomain;
@@ -263,7 +264,8 @@ void	httpServer::answer(int fd)
 	{
 		try
 		{
-			// this->mRequest[fd] = new httpRequest(this->mMsg[fd], *this->mConfig);
+			if (!this->mRequest.count(fd))
+				this->generateRequest(fd);
 			if (this->mRequest[fd]->getReqType() == "POST" && !this->mRequest[fd]->getRequest()["Content-Type"].find(" multipart/form-data; boundary="))
 				this->fileUpload(fd);
 		}
@@ -363,9 +365,7 @@ void	httpServer::answer(int fd, std::string file)
 	std::ifstream 	ifile;
 	std::string		tmp;
 	std::string		fileContent;
-	std::cout << "fd " << fd << std::endl;
-	if (this->mRequest.count(fd))
-		delete this->mRequest[fd];
+	this->eraseRequest(fd);
 	this->mRequest[fd] = new httpRequest(file, *this->mConfig, 1);
 	ifile.open(this->mRequest[fd]->getResource().c_str());
 	if (!ifile.good())
@@ -584,9 +584,11 @@ void	httpServer::eraseMsg(int fd)
 void	httpServer::eraseRequest(int fd)
 {
 	if (this->mRequest.count(fd))
+	{
 		delete this->mRequest[fd];
-	if (this->mRequest.erase(fd) != 1)
-		throw std::logic_error("Error: Failed to erase FD/Request");
+		if (this->mRequest.erase(fd) != 1)
+			throw std::logic_error("Error: Failed to erase FD/Request");
+	}
 }
 
 bool	httpServer::generateRequest(int fd)
@@ -595,6 +597,7 @@ bool	httpServer::generateRequest(int fd)
 		std::cout << "httpServer generate Request" << std::endl;
 	try
 	{
+		this->eraseRequest(fd);
 		this->mRequest[fd] = new httpRequest(this->mMsg[fd], *this->mConfig);
 	}
 	catch(const std::exception& e)
@@ -611,6 +614,6 @@ bool httpServer::readyToWrite(int fd)
 	{
 		return false;
 	}
-	delete this->mRequest[fd];
+	this->eraseRequest(fd);
 	return true;
 }

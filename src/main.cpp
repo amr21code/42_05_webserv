@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 13:59:34 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/04 15:03:47 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/05 09:18:00 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	main(int argc, char **argv)
 	}
 	std::vector<httpConfig *> 	confVector;
 	std::vector<httpServer *> 	serverVector;
-	int							epfd = epoll_create(256);
+	int							epfd = epoll_create(4000);
 	struct epoll_event			epevent;
 	epevent.events = EPOLLIN|EPOLLOUT; 
 	try
@@ -84,8 +84,8 @@ int	main(int argc, char **argv)
 	int	tmpfd = -1;
 	while (!gShutdown)
 	{
-		event_count = epoll_wait(epfd, epevents, 64, 1000);
-		std::cout << event_count << std::endl;
+		event_count = epoll_wait(epfd, epevents, 200, 1000);
+		// std::cout << event_count << std::endl;
 		try
 		{
 			if (event_count < 0 && !gShutdown)
@@ -96,7 +96,7 @@ int	main(int argc, char **argv)
 				{
 					// std::cout << "i " << i << " ev cnt " << event_count << std::endl;
 					// std::cout<< "servers " << countServers << std::endl;
-					std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
+					// std::cout<< "data.fd "<< epevents[i].data.fd << std::endl;
 					for (int j = 0; j < countServers; j++)
 					{
 						// std::cout<< "socket " << countServers << serverVector[j]->getSocket() << std::endl;
@@ -114,6 +114,7 @@ int	main(int argc, char **argv)
 									if (serverVector[j]->receive(tmpfd))
 									{
 										serverVector[j]->eraseMsg(tmpfd);
+										close(tmpfd);
 										break;
 									}
 									if (epoll_ctl(epfd, EPOLL_CTL_ADD, tmpfd, &epevent))
@@ -132,15 +133,15 @@ int	main(int argc, char **argv)
 						}
 						else
 						{
-							std::cout << "SEND/RECV TO FD" << std::endl;
+							// std::cout << "SEND/RECV TO FD" << std::endl;
 							std::map<int, std::string> tmpMap = serverVector[j]->getMsg();
 							for (std::map<int, std::string>::iterator itmsg = tmpMap.begin(); itmsg != tmpMap.end(); itmsg++)
 							{
 								// std::cout<< "1 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
 								if (itmsg->first == epevents[i].data.fd)
 								{
-									std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
-									std::cout << epevents[i].events << std::endl;
+									// std::cout<< "2 it first " << itmsg->first<< " epevents " << epevents[i].data.fd << std::endl;
+									// std::cout << epevents[i].events << std::endl;
 									if (epevents[i].events & EPOLLIN)
 									{
 										if (serverVector[j]->receive(epevents[i].data.fd))
@@ -151,7 +152,7 @@ int	main(int argc, char **argv)
 												throw std::logic_error("Error (2): Failed to delete file descriptor to epoll");
 											close(epevents[i].data.fd);
 										}
-										std::cout << "TEST EPOLLIN" << std::endl;
+										// std::cout << "TEST EPOLLIN" << std::endl;
 									}
 									else if ((epevents[i].events & EPOLLOUT) && serverVector[j]->readyToWrite(epevents[i].data.fd))
 									{
@@ -196,6 +197,10 @@ void	si_handler_shell(int sig)
 	if (sig == SIGINT)
 	{
 		gShutdown = true;
+	}
+	else if (sig == SIGPIPE)
+	{
+		std::cout << "Error: File descriptor closed unexpectedly during writing" << std::endl;
 	}
 }
 

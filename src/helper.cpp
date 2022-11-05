@@ -6,7 +6,7 @@
 /*   By: anruland <anruland@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/26 14:57:00 by anruland          #+#    #+#             */
-/*   Updated: 2022/11/03 14:53:11 by anruland         ###   ########.fr       */
+/*   Updated: 2022/11/05 08:18:30 by anruland         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,11 @@ void	si_init_sighandling(void)
 	sigemptyset(&signals);
 	sigaddset(&signals, SIGQUIT);
 	sigaddset(&signals, SIGINT);
+	sigaddset(&signals, SIGPIPE);
 	s_action.sa_mask = signals;
 	s_action.sa_flags = SA_RESTART;
 	s_action.sa_handler = &si_handler_shell;
 	sigaction(SIGINT, &s_action, NULL);
+	sigaction(SIGPIPE, &s_action, NULL);
 	signal(SIGQUIT, SIG_IGN);
 }
